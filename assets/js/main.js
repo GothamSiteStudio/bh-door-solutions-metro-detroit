@@ -84,6 +84,12 @@
     });
   });
 
+  /* Show the contact-form error banner if a send failed */
+  if (location.search.indexOf("error=send") > -1) {
+    var err = document.getElementById("formErr");
+    if (err) { err.style.display = "block"; err.scrollIntoView({ block: "center" }); }
+  }
+
   /* Global Escape: close the mobile menu */
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape" && header && header.classList.contains("menu-open")) {

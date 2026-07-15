@@ -6,10 +6,13 @@ or ask and we'll do it.
 
 ## 🔴 Do before / right after launch
 
-1. **Contact form endpoint** — the form currently posts to `https://formspree.io/f/REPLACE_WITH_FORM_ID`
-   (in `build.py` → `build_contact()`). Create a free [Formspree](https://formspree.io) or
-   [Web3Forms](https://web3forms.com) form, paste the real endpoint, rebuild. *Until then, phone & email work fine;
-   form submissions won't be delivered.* Set the form's redirect to `/thank-you/`.
+1. **Contact form** — ✅ **working.** Submissions post to a Cloudflare Worker (`bh-door-form`,
+   `https://bh-door-form.oren-siyonov.workers.dev`) that emails the lead to **info@bhdoorsolutionsmetrodetroit.com**
+   via Resend (from `leads@gothamsitestudio.com`), then redirects to `/thank-you/`.
+   - Worker source: `../bh-door-form-worker/` (deploy with `npx wrangler deploy`; the Resend key is a Worker
+     secret, not in code).
+   - **To change who receives leads:** edit `TO` in `bh-door-form-worker/src/index.js` and redeploy.
+   - Confirm `info@bhdoorsolutionsmetrodetroit.com` forwards to a real inbox (Namecheap email forwarding).
 
 2. **Google Business Profile (GBP)** — set up GBP as a **service-area business** (hide address, list the service-area
    cities). This is the #1 local-ranking lever for an address-less business. Then set `BIZ["google"]` (and

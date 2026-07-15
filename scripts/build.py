@@ -827,7 +827,8 @@ def build_contact():
       <div class="form-card">
         <h2 style="font-size:1.5rem;margin-bottom:.2em">Request a callback</h2>
         <p style="color:var(--steel);font-size:.92rem;margin-bottom:1em">We'll get back to you fast — usually the same day.</p>
-        <form action="https://formspree.io/f/REPLACE_WITH_FORM_ID" method="POST">
+        <div id="formErr" class="note" role="alert" style="display:none;border-color:var(--danger);background:var(--danger-050);margin-bottom:16px">Sorry — something went wrong sending your request. Please call us at <a href="tel:{BIZ["tel"]}">{esc(BIZ["phone"])}</a> and we'll help right away.</div>
+        <form action="https://bh-door-form.oren-siyonov.workers.dev" method="POST">
           <div class="form-row">
             <div class="field"><label for="name">Name <span class="req">*</span></label><input id="name" name="name" required autocomplete="name"></div>
             <div class="field"><label for="phone">Phone <span class="req">*</span></label><input id="phone" name="phone" type="tel" required autocomplete="tel"></div>
@@ -838,7 +839,6 @@ def build_contact():
           </div>
           <div class="field"><label for="message">How can we help?</label><textarea id="message" name="message" placeholder="Tell us about your door…"></textarea></div>
           <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off" aria-hidden="true">
-          <input type="hidden" name="_subject" value="New estimate request — BH Door Solutions">
           <button class="btn btn-primary btn-lg btn-block" type="submit">{ICONS["calendar"]} Request My Free Estimate</button>
           <p class="form-note">By submitting you agree to be contacted about your request. We never share your information.</p>
         </form>
