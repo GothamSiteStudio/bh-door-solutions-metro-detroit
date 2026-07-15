@@ -290,12 +290,12 @@ def header(active=""):
       </a>
       <ul class="nav-menu">
         <li><a href="/"{' aria-current="page"' if active=="home" else ''}>Home</a></li>
-        <li class="has-dd"><button aria-expanded="false" aria-haspopup="true">Services <span class="caret">{ICONS["chevron"]}</span></button>
-          <div class="dropdown"><div class="dd-grid three">{svc_items}</div>
+        <li class="has-dd"><button aria-expanded="false" aria-haspopup="true" aria-controls="dd-services">Services <span class="caret">{ICONS["chevron"]}</span></button>
+          <div class="dropdown" id="dd-services"><div class="dd-grid three">{svc_items}</div>
             <div class="dd-foot"><span>Residential &amp; commercial — installation &amp; repair.</span>
             <a class="sc-link" href="/services/">All services {ICONS["arrow"]}</a></div></div></li>
-        <li class="has-dd"><button aria-expanded="false" aria-haspopup="true">Service Areas <span class="caret">{ICONS["chevron"]}</span></button>
-          <div class="dropdown areas"><div class="dd-grid three">{city_items}</div>
+        <li class="has-dd"><button aria-expanded="false" aria-haspopup="true" aria-controls="dd-areas">Service Areas <span class="caret">{ICONS["chevron"]}</span></button>
+          <div class="dropdown areas" id="dd-areas"><div class="dd-grid three">{city_items}</div>
             <div class="dd-foot"><span>18+ metro Detroit cities across 3 counties.</span>
             <a class="sc-link" href="/service-areas/">All areas {ICONS["arrow"]}</a></div></div></li>
         <li><a href="/services/door-installation-cost/"{' aria-current="page"' if active=="cost" else ''}>Pricing</a></li>
@@ -467,7 +467,7 @@ def render(path, title, description, body, graph, active="", og_image="/assets/i
 {jsonld(g)}
 </head>
 <body>
-<a href="#main" class="btn btn-primary" style="position:absolute;left:-9999px;top:0;z-index:200" onfocus="this.style.left='12px';this.style.top='12px'" onblur="this.style.left='-9999px'">Skip to content</a>
+<a href="#main" class="skip-link btn btn-primary">Skip to main content</a>
 {header(active)}
 <main id="main">
 {body}
@@ -571,7 +571,7 @@ def build_services_hub():
              service_node("Door Services","door-repair","Full-service residential and commercial door installation and repair across metro Detroit.")]
     body = f'''<section class="page-hero"><div class="container"><div class="page-hero-grid">
       <div><span class="eyebrow">Our Services</span><h1>Door Services in Metro Detroit</h1>
-      <p>From a brand-new fiberglass front door to a slider off its track at midnight — BH Door Solutions installs and repairs every kind of residential and commercial door across Wayne, Oakland, and Macomb counties.</p>
+      <p>From a brand-new fiberglass front door to a slider that's jumped its track, BH Door Solutions installs and repairs every kind of residential and commercial door across Wayne, Oakland, and Macomb counties — with fast, same-day service.</p>
       <div class="hero-cta"><a class="btn btn-primary btn-lg" href="/contact/">Get a Free Estimate</a>
       <a class="btn btn-ghost btn-lg" href="tel:{BIZ["tel"]}">{ICONS["phone"]} {esc(BIZ["phone"])}</a></div></div>
       <div class="page-hero-media"><img src="/assets/img/svc-entry.webp" width="1200" height="800" alt="Door services in metro Detroit"></div>
