@@ -1,0 +1,11 @@
+# Build intermediates
+scripts/_raw/
+scripts/_contact_sheet.png
+scripts/_og_preview.png
+scripts/__pycache__/
+__pycache__/
+*.pyc
+
+# OS
+.DS_Store
+Thumbs.db
