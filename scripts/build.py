@@ -6,11 +6,21 @@ Consumes scripts/_copy.json (produced by the copywriting workflow) + metadata be
 and emits a fully SEO-optimized static site (clean directory URLs, JSON-LD, sitemap,
 robots, manifest, Matomo). Run:  python scripts/build.py
 """
-import json, os, html, datetime, re
+import json, os, html, datetime, re, hashlib
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 COPY = json.load(open(os.path.join(ROOT, "scripts", "_copy.json"), encoding="utf-8"))
 TODAY = datetime.date.today().isoformat()
+
+def _asset_ver():
+    """Content hash of CSS/JS so browsers refetch only when they actually change."""
+    h = hashlib.md5()
+    for f in ("assets/css/styles.css", "assets/css/fonts.css", "assets/js/main.js"):
+        p = os.path.join(ROOT, f)
+        if os.path.exists(p):
+            h.update(open(p, "rb").read())
+    return h.hexdigest()[:8]
+ASSET_VER = _asset_ver()
 
 # --------------------------------------------------------------------------- #
 #  BUSINESS
@@ -447,7 +457,7 @@ def render(path, title, description, body, graph, active="", og_image="/assets/i
 <meta name="geo.region" content="US-MI"><meta name="geo.placename" content="Detroit, Michigan">
 <link rel="preload" href="/assets/fonts/manrope-800.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/inter-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/assets/css/styles.css">
+<link rel="stylesheet" href="/assets/css/styles.css?v={ASSET_VER}">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" type="image/svg+xml" href="/assets/img/logo-mark.svg">
 <link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
@@ -474,7 +484,7 @@ def render(path, title, description, body, graph, active="", og_image="/assets/i
 </main>
 {footer()}
 {mobile_cta()}
-<script src="/assets/js/main.js" defer></script>
+<script src="/assets/js/main.js?v={ASSET_VER}" defer></script>
 {MATOMO}
 </body>
 </html>'''
@@ -932,10 +942,10 @@ def page_wrap(path,title,desc,body,graph,robots="index,follow,max-image-preview:
 <meta name="viewport" content="width=device-width, initial-scale=1"><title>{esc(title)}</title>
 <meta name="description" content="{esc(desc)}"><meta name="robots" content="{robots}">
 <meta name="theme-color" content="#0d2035">
-<link rel="stylesheet" href="/assets/css/styles.css"><link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="stylesheet" href="/assets/css/styles.css?v={ASSET_VER}"><link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" type="image/svg+xml" href="/assets/img/logo-mark.svg"><link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
 {jsonld(g)}</head><body>{header()}<main id="main">{body}</main>{footer()}{mobile_cta()}
-<script src="/assets/js/main.js" defer></script>
+<script src="/assets/js/main.js?v={ASSET_VER}" defer></script>
 {MATOMO}</body></html>'''
 
 # --------------------------------------------------------------------------- #
