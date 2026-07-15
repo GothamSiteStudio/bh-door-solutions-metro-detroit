@@ -453,6 +453,7 @@ def render(path, title, description, body, graph, active="", og_image="/assets/i
 <link rel="canonical" href="{canonical}">
 <meta name="robots" content="index,follow,max-image-preview:large">
 <meta name="theme-color" content="#0d2035">
+<meta name="msvalidate.01" content="534011101779A9CCE428FCB92474BE37">
 <meta name="format-detection" content="telephone=yes">
 <meta name="geo.region" content="US-MI"><meta name="geo.placename" content="Detroit, Michigan">
 <link rel="preload" href="/assets/fonts/manrope-800.woff2" as="font" type="font/woff2" crossorigin>
@@ -984,6 +985,9 @@ Sitemap: {BIZ['base']}/sitemap.xml
     open(os.path.join(ROOT,"site.webmanifest"),"w",encoding="utf-8").write(json.dumps(manifest,indent=2))
     open(os.path.join(ROOT,"CNAME"),"w",encoding="utf-8").write(BIZ["domain"]+"\n")
     open(os.path.join(ROOT,".nojekyll"),"w",encoding="utf-8").write("")
+    # Bing Webmaster Tools site verification (public by design)
+    open(os.path.join(ROOT,"BingSiteAuth.xml"),"w",encoding="utf-8").write(
+        '<?xml version="1.0"?>\n<users>\n  <user>534011101779A9CCE428FCB92474BE37</user>\n</users>\n')
 
 # --------------------------------------------------------------------------- #
 def main():
