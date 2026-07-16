@@ -13,13 +13,12 @@ os.makedirs(IMG_DIR, exist_ok=True)
 os.makedirs(RAW_DIR, exist_ok=True)
 
 # API key: from GEMINI_API_KEY env var, or a file pointed to by GEMINI_KEY_FILE.
+# Only required for actual generation — `python generate_images.py variants` works without it.
 KEY = os.environ.get("GEMINI_API_KEY", "").strip()
 if not KEY:
     kf = os.environ.get("GEMINI_KEY_FILE", "")
     if kf and os.path.exists(kf):
         KEY = open(kf, encoding="utf-8").read().strip()
-if not KEY:
-    raise SystemExit("Set GEMINI_API_KEY (or GEMINI_KEY_FILE) to run image generation.")
 MODEL = "gemini-2.5-flash-image"
 URL = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:generateContent?key={KEY}"
 
@@ -80,6 +79,8 @@ def gen(name, prompt, tries=3):
     raw_path = os.path.join(RAW_DIR, name+".png")
     if os.path.exists(raw_path):
         return raw_path
+    if not KEY:
+        raise SystemExit("Set GEMINI_API_KEY (or GEMINI_KEY_FILE) to run image generation.")
     body = {"contents":[{"parts":[{"text": prompt + STYLE}]}]}
     for t in range(tries):
         try:
@@ -126,6 +127,39 @@ def make_og(hero_raw):
     im.save(out, quality=88)
     print("  og-image.jpg written")
 
+def make_variants():
+    """Responsive srcset variants (-480/-800/-1200.webp) for every template image.
+    Sourced from _raw PNGs when available (best quality), else downscaled from the
+    full-size webp. Idempotent — skips variants that already exist."""
+    widths = (480, 800, 1200)
+    for name, (_prompt, _aspect, (w, h)) in IMAGES.items():
+        if name == "svc-emergency":
+            continue  # service removed from the business
+        src_raw = os.path.join(RAW_DIR, name + ".png")
+        src_webp = os.path.join(IMG_DIR, name + ".webp")
+        src = src_raw if os.path.exists(src_raw) else src_webp
+        if not os.path.exists(src):
+            print(f"  !! no source for {name}, skipping"); continue
+        im0 = Image.open(src)
+        for vw in widths:
+            if vw >= w:
+                continue
+            out = os.path.join(IMG_DIR, f"{name}-{vw}.webp")
+            if os.path.exists(out):
+                continue
+            vh = int(round(vw * h / w))
+            crop_resize(im0.copy(), vw, vh).save(out, "WEBP", quality=80, method=6)
+            print(f"  {name}-{vw}.webp ({vw}x{vh})")
+    # the two 1600px area shots are the LCP on 18 city pages — recompress the full size
+    for name in ("area-neighborhood", "area-neighborhood2"):
+        raw = os.path.join(RAW_DIR, name + ".png")
+        full = os.path.join(IMG_DIR, name + ".webp")
+        if os.path.exists(raw) and os.path.exists(full) and os.path.getsize(full) > 280_000:
+            w, h = IMAGES[name][2]
+            crop_resize(Image.open(raw), w, h).save(full, "WEBP", quality=74, method=6)
+            print(f"  recompressed {name}.webp -> {os.path.getsize(full)//1024}KB")
+    print("variants DONE")
+
 def main():
     hero_raw = None
     for name,(prompt,aspect,(w,h)) in IMAGES.items():
@@ -150,4 +184,8 @@ def main():
     print("DONE")
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) > 1 and sys.argv[1] == "variants":
+        make_variants()
+    else:
+        main()
+        make_variants()

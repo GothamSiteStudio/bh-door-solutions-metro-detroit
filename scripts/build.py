@@ -258,12 +258,36 @@ def faq_node(faqs):
     return {"@type":"FAQPage","mainEntity":[
         {"@type":"Question","name":q,"acceptedAnswer":{"@type":"Answer","text":a}} for q,a in faqs]}
 
-def service_node(name, slug, desc, areas=None):
-    node = {"@type":"Service","name":name,"serviceType":name,
+def service_node(name, slug, desc, areas=None, url_path=None, service_type=None):
+    node = {"@type":"Service","name":name,"serviceType":service_type or name,
             "provider":{"@id":BIZ["base"]+"/#business"},
-            "url":U(svc_url(slug)),"description":desc,
+            "url":U(url_path or svc_url(slug)),"description":desc,
             "areaServed":[{"@type":"City","name":city_name(s)+", MI"} for s in (areas or TOP_CITIES)]}
     return node
+
+# Clean schema.org service categories per page (no SEO-title/"near me" stuffing in structured data)
+SERVICE_TYPE = {
+ "entry-door-installation": "Entry Door Installation",
+ "patio-door-installation": "Patio Door Installation",
+ "storm-door-installation": "Storm Door Installation",
+ "interior-door-installation": "Interior Door Installation",
+ "door-repair": "Door Repair",
+ "sliding-door-repair": "Sliding Door Repair",
+ "door-frame-repair": "Door Frame and Jamb Repair",
+ "lock-hardware-installation": "Door Lock and Hardware Installation",
+ "commercial-door-repair": "Commercial Door Installation and Repair",
+ "door-installation-cost": "Door Installation Cost Estimation",
+}
+
+def srcset(name, maxw):
+    """Responsive srcset for /assets/img/{name}.webp with -480/-800/-1200 variants."""
+    ws = [w for w in (480, 800, 1200) if w < maxw]
+    parts = [f"/assets/img/{name}-{w}.webp {w}w" for w in ws]
+    parts.append(f"/assets/img/{name}.webp {maxw}w")
+    return ", ".join(parts)
+
+SIZES_HERO = "(max-width: 900px) 100vw, 50vw"
+SIZES_CARD = "(max-width: 700px) 100vw, (max-width: 1080px) 50vw, 33vw"
 
 def jsonld(graph):
     return ('<script type="application/ld+json">' +
@@ -327,12 +351,14 @@ def mobile_cta():
             f'<a class="btn btn-primary" href="/contact/">Free Estimate</a></div>')
 
 def footer():
-    svc_links = "".join(f'<li><a href="{svc_url(s)}">{esc(SVC_INFO[s]["nav"])}</a></li>' for s in SVC_ORDER[:8])
+    svc_links = "".join(f'<li><a href="{svc_url(s)}">{esc(SVC_INFO[s]["nav"])}</a></li>' for s in SVC_ORDER)
     city_links = "".join(f'<li><a href="{city_url(s)}">{esc(city_name(s))}</a></li>' for s in TOP_CITIES)
     social = ""
     for key,url in [("google",BIZ["google"]),("facebook",BIZ["facebook"]),("instagram",BIZ["instagram"])]:
-        href = url or "#"
-        social += f'<a href="{href}" aria-label="{key.title()}"{" rel=nofollow" if not url else ""}>{ICONS[key]}</a>'
+        if not url:
+            continue  # never render dead "#" links — add real profile URLs in BIZ when live
+        social += f'<a href="{url}" aria-label="{key.title()}" target="_blank" rel="noopener">{ICONS[key]}</a>'
+    social_html = f'<div class="social">{social}</div>' if social else ''
     lic = f' · License #{esc(BIZ["license_no"])}' if BIZ["license_no"] else ""
     return f'''<footer class="site-footer">
     <div class="container"><div class="footer-grid">
@@ -340,7 +366,7 @@ def footer():
         <a class="brand" href="/"><img src="/assets/img/logo-mark.svg" width="46" height="46" alt="">
           <span class="wm"><span class="name">BH Door Solutions</span><span class="tag">Metro Detroit</span></span></a>
         <p>Residential &amp; commercial door installation and repair across metro Detroit — entry, patio, storm, interior, and commercial doors, plus fast same-day repairs. Licensed &amp; insured, honest pricing, free estimates.</p>
-        <div class="social">{social}</div>
+        {social_html}
       </div>
       <div class="footer-col"><h4>Services</h4><ul>{svc_links}
         <li><a href="/services/">All services →</a></li></ul></div>
@@ -357,8 +383,8 @@ def footer():
       </div>
     </div></div>
     <div class="footer-bottom"><div class="container">
-      <span>© {datetime.date.today().year} {esc(BIZ["name"])}. All rights reserved.{lic}</span>
-      <span><a href="/service-areas/">Service Areas</a> · <a href="/services/">Services</a> · <a href="/contact/">Contact</a> · <a href="/sitemap.xml">Sitemap</a></span>
+      <span>© {datetime.date.today().year} {esc(BIZ["name"])}. All rights reserved.{lic} · Built, designed &amp; promoted by <a href="https://www.gothamsitestudio.com/" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Gotham Site Studio</a></span>
+      <span><a href="/service-areas/">Service Areas</a> · <a href="/services/">Services</a> · <a href="/about/">About</a> · <a href="/reviews/">Reviews</a> · <a href="/faq/">FAQ</a> · <a href="/gallery/">Gallery</a> · <a href="/financing/">Financing</a> · <a href="/contact/">Contact</a> · <a href="/sitemap.xml">Sitemap</a></span>
     </div></div>
   </footer>'''
 
@@ -378,17 +404,24 @@ def cta_band(title="Ready for doors that work — and wow?", text="Get a free, n
         <a class="btn btn-white btn-lg" href="/contact/">Free Estimate</a>
       </div></div></div></div></section>'''
 
-def faq_section(faqs, heading="Frequently Asked Questions", sub=None):
+def faq_section(faqs, heading="Frequently Asked Questions", sub=None, more_link=None):
     items = ""
     for q,a in faqs:
         items += f'<details><summary>{esc(q)}</summary><div class="faq-a"><p>{esc(a)}</p></div></details>'
     subhtml = f'<p>{esc(sub)}</p>' if sub else ''
+    more = (f'<p class="text-center mt-2"><a class="btn btn-ghost" href="{more_link}">See all door FAQs {ICONS["arrow"]}</a></p>'
+            if more_link else '')
     return f'''<section class="section bg-cloud"><div class="container">
       <div class="section-head center"><span class="eyebrow">Answers</span><h2>{esc(heading)}</h2>{subhtml}</div>
-      <div class="faq">{items}</div></div></section>'''
+      <div class="faq">{items}</div>{more}</div></section>'''
 
 def trust_strip():
-    items = "".join(f'<div class="trust-item">{ICONS[i]} {esc(t)}</div>' for i,t in TRUST_ITEMS)
+    items = ""
+    for i,t in TRUST_ITEMS:
+        if t == "Financing Available":
+            items += f'<a class="trust-item" href="/financing/">{ICONS[i]} {esc(t)}</a>'
+        else:
+            items += f'<div class="trust-item">{ICONS[i]} {esc(t)}</div>'
     return f'<div class="truststrip"><div class="container">{items}</div></div>'
 
 def brands_block():
@@ -417,18 +450,27 @@ def process_block():
         <p>From your first call to the final walkthrough, we keep it clear and easy.</p></div>
       <div class="grid grid-4 steps">{steps}</div></div></section>'''
 
-def reviews_invite():
-    """Honest review section — invites Google reviews instead of fabricating testimonials."""
-    g = BIZ["google"] or "#"
+def reviews_invite(on_reviews_page=False):
+    """Honest review section — invites Google reviews instead of fabricating testimonials.
+    Never renders a dead '#' link: until the Google Business Profile URL is set in BIZ,
+    the primary CTA points at real pages instead."""
+    if BIZ["google"]:
+        btns = (f'<a class="btn btn-primary" href="{BIZ["google"]}" target="_blank" rel="noopener">{ICONS["google"]} Read Google Reviews</a>'
+                f'<a class="btn btn-ghost" href="/reviews/">More about our promise {ICONS["arrow"]}</a>')
+    elif on_reviews_page:
+        btns = (f'<a class="btn btn-primary" href="tel:{BIZ["tel"]}">{ICONS["phone"]} {esc(BIZ["phone"])}</a>'
+                f'<a class="btn btn-ghost" href="/contact/">Get a free estimate {ICONS["arrow"]}</a>')
+    else:
+        btns = (f'<a class="btn btn-primary" href="/reviews/">{ICONS["badge"]} Our promise to every customer</a>'
+                f'<a class="btn btn-ghost" href="/gallery/">See our work {ICONS["arrow"]}</a>')
     return f'''<section class="section"><div class="container">
       <div class="split">
         <div><span class="eyebrow">Reviews</span>
           <h2>Building a reputation, one door at a time</h2>
           <p class="lead">We'd rather earn your trust than borrow someone else's words. Every job is done to the standard we'd want in our own home — clean, on time, and guaranteed.</p>
-          <p>Worked with us? We'd love your feedback. Checking us out? Read verified reviews from metro Detroit homeowners on Google.</p>
+          <p>Worked with us? We'd love your feedback. Checking us out? See exactly what you can expect from our team.</p>
           <div class="hero-cta">
-            <a class="btn btn-primary" href="{g}"{' rel="nofollow"' if not BIZ["google"] else ''} target="_blank" rel="noopener">{ICONS["google"]} Read Google Reviews</a>
-            <a class="btn btn-ghost" href="/reviews/">More about our promise {ICONS["arrow"]}</a>
+            {btns}
           </div>
         </div>
         <div class="grid" style="gap:16px">
@@ -440,9 +482,12 @@ def reviews_invite():
 # --------------------------------------------------------------------------- #
 #  PAGE SHELL
 # --------------------------------------------------------------------------- #
-def render(path, title, description, body, graph, active="", og_image="/assets/img/og-image.jpg", extra_head=""):
+def render(path, title, description, body, graph, active="", og_image="/assets/img/og-image.jpg", extra_head="", noindex=False):
     canonical = U(path)
     g = [business_node()] + graph
+    robots_meta = "noindex,follow" if noindex else "index,follow,max-image-preview:large"
+    canonical_tag = "" if noindex else f'<link rel="canonical" href="{canonical}">\n'
+    og_url_tag = "" if noindex else f'<meta property="og:url" content="{canonical}">\n'
     doc = f'''<!doctype html>
 <html lang="en">
 <head>
@@ -450,8 +495,7 @@ def render(path, title, description, body, graph, active="", og_image="/assets/i
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{esc(title)}</title>
 <meta name="description" content="{esc(description)}">
-<link rel="canonical" href="{canonical}">
-<meta name="robots" content="index,follow,max-image-preview:large">
+{canonical_tag}<meta name="robots" content="{robots_meta}">
 <meta name="theme-color" content="#0d2035">
 <meta name="msvalidate.01" content="534011101779A9CCE428FCB92474BE37">
 <meta name="format-detection" content="telephone=yes">
@@ -467,8 +511,7 @@ def render(path, title, description, body, graph, active="", og_image="/assets/i
 <meta property="og:site_name" content="{esc(BIZ["name"])}">
 <meta property="og:title" content="{esc(title)}">
 <meta property="og:description" content="{esc(description)}">
-<meta property="og:url" content="{canonical}">
-<meta property="og:image" content="{U(og_image)}">
+{og_url_tag}<meta property="og:image" content="{U(og_image)}">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{esc(title)}">
@@ -509,7 +552,7 @@ def build_home():
     for s in SVC_ORDER:
         i = SVC_INFO[s]; c = SVC_COPY[s]
         cards += f'''<a class="card svc-card" href="{svc_url(s)}">
-          <div class="sc-media"><img src="/assets/img/{i["img"]}.webp" width="1200" height="800" loading="lazy" alt="{esc(c["h1"])} in metro Detroit"><span class="sc-tag">{esc(i["group"])}</span></div>
+          <div class="sc-media"><img src="/assets/img/{i["img"]}.webp" srcset="{srcset(i["img"],1200)}" sizes="{SIZES_CARD}" width="1200" height="800" loading="lazy" alt="{esc(c["h1"])}"><span class="sc-tag">{esc(i["group"])}</span></div>
           <div class="sc-body"><h3>{esc(i["nav"])}</h3><p>{esc(c["hero_tagline"])}</p>
           <span class="sc-link">Learn more {ICONS["arrow"]}</span></div></a>'''
     # city chips
@@ -519,7 +562,7 @@ def build_home():
     intro_body = paras(h["intro_body"])
     faqs = [(f["q"],f["a"]) for f in h["faqs"]]
     graph = [website_node(), breadcrumb_node([("Home","/")]), faq_node(faqs),
-             service_node("Door Installation and Repair","door-repair",h["meta_description"])]
+             service_node("Door Installation and Repair","door-repair",h["meta_description"],url_path="/")]
     body = f'''<section class="hero"><div class="container"><div class="hero-grid">
       <div class="hero-copy">
         <span class="eyebrow">Door Installation &amp; Repair · Metro Detroit</span>
@@ -532,7 +575,7 @@ def build_home():
         <div class="hero-trust">{chips}</div>
       </div>
       <div class="hero-media">
-        <img src="/assets/img/hero-home.webp" width="1600" height="1000" fetchpriority="high" alt="Newly installed fiberglass front entry door on a metro Detroit home">
+        <img src="/assets/img/hero-home.webp" srcset="{srcset("hero-home",1600)}" sizes="{SIZES_HERO}" width="1600" height="1000" fetchpriority="high" alt="Newly installed fiberglass front entry door on a metro Detroit home">
         <div class="hero-badge"><span class="hb-ic">{ICONS["clock"]}</span><span><b>Same-Day</b><span>service available across metro Detroit</span></span></div>
       </div>
     </div></div></section>
@@ -544,7 +587,7 @@ def build_home():
           <div class="hero-cta"><a class="btn btn-navy" href="/services/">Explore our services {ICONS["arrow"]}</a>
           <a class="btn btn-ghost" href="/service-areas/">Areas we serve</a></div>
         </div>
-        <div class="page-hero-media"><img src="/assets/img/process-install.webp" width="1200" height="800" loading="lazy" alt="BH Door Solutions installers fitting a new exterior door in metro Detroit" style="border-radius:var(--r-xl);box-shadow:var(--sh-3)"></div>
+        <div class="page-hero-media"><img src="/assets/img/process-install.webp" srcset="{srcset("process-install",1200)}" sizes="{SIZES_HERO}" width="1200" height="800" loading="lazy" alt="BH Door Solutions installers fitting a new exterior door in metro Detroit" style="border-radius:var(--r-xl);box-shadow:var(--sh-3)"></div>
       </div></div></section>
     <section class="section bg-cloud"><div class="container">
       <div class="section-head center"><span class="eyebrow">Our Services</span>
@@ -561,7 +604,7 @@ def build_home():
     </div></section>
     {reviews_invite()}
     {brands_block()}
-    {faq_section(faqs, "Door installation & repair FAQs", "Quick answers for metro Detroit homeowners and businesses.")}
+    {faq_section(faqs, "Door installation & repair FAQs", "Quick answers for metro Detroit homeowners and businesses.", more_link="/faq/")}
     {cta_band()}'''
     render("/", h["meta_title"], h["meta_description"], body, graph, active="home")
 
@@ -575,17 +618,18 @@ def build_services_hub():
         for s in groups.get(grp,[]):
             i=SVC_INFO[s]; c=SVC_COPY[s]
             cards += f'''<a class="card svc-card" href="{svc_url(s)}">
-              <div class="sc-media"><img src="/assets/img/{i["img"]}.webp" width="1200" height="800" loading="lazy" alt="{esc(c["h1"])}"><span class="sc-tag">{esc(grp)}</span></div>
+              <div class="sc-media"><img src="/assets/img/{i["img"]}.webp" srcset="{srcset(i["img"],1200)}" sizes="{SIZES_CARD}" width="1200" height="800" loading="lazy" alt="{esc(c["h1"])}"><span class="sc-tag">{esc(grp)}</span></div>
               <div class="sc-body"><h3>{esc(c["h1"])}</h3><p>{esc(c["hero_tagline"])}</p><span class="sc-link">View service {ICONS["arrow"]}</span></div></a>'''
         sections += f'<div class="section-head" style="margin-top:12px"><h2>{esc(grp)}</h2></div><div class="grid grid-3">{cards}</div>'
     graph = [breadcrumb_node([("Home","/"),("Services","/services/")]),
-             service_node("Door Services","door-repair","Full-service residential and commercial door installation and repair across metro Detroit.")]
+             service_node("Door Services","door-repair","Full-service residential and commercial door installation and repair across metro Detroit.",
+                           url_path="/services/",service_type="Door Installation and Repair")]
     body = f'''<section class="page-hero"><div class="container"><div class="page-hero-grid">
       <div><span class="eyebrow">Our Services</span><h1>Door Services in Metro Detroit</h1>
       <p>From a brand-new fiberglass front door to a slider that's jumped its track, BH Door Solutions installs and repairs every kind of residential and commercial door across Wayne, Oakland, and Macomb counties — with fast, same-day service.</p>
       <div class="hero-cta"><a class="btn btn-primary btn-lg" href="/contact/">Get a Free Estimate</a>
       <a class="btn btn-ghost btn-lg" href="tel:{BIZ["tel"]}">{ICONS["phone"]} {esc(BIZ["phone"])}</a></div></div>
-      <div class="page-hero-media"><img src="/assets/img/svc-entry.webp" width="1200" height="800" alt="Door services in metro Detroit"></div>
+      <div class="page-hero-media"><img src="/assets/img/svc-entry.webp" srcset="{srcset("svc-entry",1200)}" sizes="{SIZES_HERO}" width="1200" height="800" fetchpriority="high" alt="Door services in metro Detroit"></div>
     </div></div></section>
     {breadcrumb([("Home","/"),("Services","/services/")])}
     {trust_strip()}
@@ -615,19 +659,22 @@ def build_service(slug):
     for r in RELATED[slug]:
         ri=SVC_INFO[r]; rc=SVC_COPY[r]
         rel += f'''<a class="card svc-card" href="{svc_url(r)}">
-          <div class="sc-media"><img src="/assets/img/{ri["img"]}.webp" width="1200" height="800" loading="lazy" alt="{esc(rc["h1"])}"></div>
+          <div class="sc-media"><img src="/assets/img/{ri["img"]}.webp" srcset="{srcset(ri["img"],1200)}" sizes="{SIZES_CARD}" width="1200" height="800" loading="lazy" alt="{esc(rc["h1"])}"></div>
           <div class="sc-body"><h3>{esc(ri["nav"])}</h3><p>{esc(rc["hero_tagline"])}</p><span class="sc-link">Learn more {ICONS["arrow"]}</span></div></a>'''
     city_links = " · ".join(f'<a href="{city_url(s)}">{esc(city_name(s))}</a>' for s in TOP_CITIES)
-    graph = [breadcrumb_node([("Home","/"),("Services","/services/"),(c["h1"],svc_url(slug))]),
-             service_node(c["h1"], slug, c["meta_description"]), faq_node(faqs)]
+    graph = [breadcrumb_node([("Home","/"),("Services","/services/"),(SVC_INFO[slug]["nav"],svc_url(slug))]),
+             service_node(SERVICE_TYPE[slug], slug, c["meta_description"]), faq_node(faqs)]
     active = "cost" if slug=="door-installation-cost" else ""
+    # every service page links to the cost-guide money page (internal-linking plan, BUILD-BRIEF §8)
+    cost_link = ("" if slug=="door-installation-cost" else
+                 '<p style="margin-top:.9em;font-size:.92rem;text-align:center"><a href="/services/door-installation-cost/">See typical metro Detroit door prices →</a></p>')
     emergency_badge = f'<span class="pill">{esc(i["group"])}</span>'
     body = f'''<section class="page-hero"><div class="container"><div class="page-hero-grid">
       <div>{emergency_badge}<h1 style="margin-top:.5em">{esc(c["h1"])}</h1>
       <p>{esc(c["hero_tagline"])}</p>
       <div class="hero-cta"><a class="btn btn-primary btn-lg" href="/contact/">Get a Free Estimate</a>
       <a class="btn btn-ghost btn-lg" href="tel:{BIZ["tel"]}">{ICONS["phone"]} {esc(BIZ["phone"])}</a></div></div>
-      <div class="page-hero-media"><img src="/assets/img/{i["img"]}.webp" width="1200" height="800" fetchpriority="high" alt="{esc(c["h1"])} in metro Detroit by BH Door Solutions"></div>
+      <div class="page-hero-media"><img src="/assets/img/{i["img"]}.webp" srcset="{srcset(i["img"],1200)}" sizes="{SIZES_HERO}" width="1200" height="800" fetchpriority="high" alt="{esc(c["h1"])} — BH Door Solutions"></div>
     </div></div></section>
     {breadcrumb([("Home","/"),("Services","/services/"),(SVC_INFO[slug]["nav"],svc_url(slug))])}
     {trust_strip()}
@@ -644,6 +691,7 @@ def build_service(slug):
         <a class="btn btn-primary btn-block" href="/contact/">Get My Free Estimate</a>
         <p class="text-center" style="margin:.8em 0 .2em;color:var(--steel);font-size:.9rem">or call</p>
         <a class="btn btn-navy btn-block" href="tel:{BIZ["tel"]}">{ICONS["phone"]} {esc(BIZ["phone"])}</a>
+        {cost_link}
         <h3 style="margin-top:1.4em">Why choose BH</h3>
         <ul class="chk">
           <li>Licensed &amp; insured local team</li>
@@ -657,7 +705,7 @@ def build_service(slug):
     <section class="section bg-cloud"><div class="container">
       <div class="section-head center"><span class="eyebrow">Why homeowners choose us</span><h2>The BH Door Solutions difference</h2></div>
       <div class="grid grid-3">{why}</div></div></section>
-    {faq_section(faqs, esc(SVC_INFO[slug]["nav"]) + " — FAQs")}
+    {faq_section(faqs, SVC_INFO[slug]["nav"] + " — FAQs")}
     <section class="section"><div class="container">
       <div class="section-head"><span class="eyebrow">Serving metro Detroit</span><h2>Available across every suburb we serve</h2>
       <p>Including {city_links} and <a href="/service-areas/">18+ more cities</a>.</p></div>
@@ -677,11 +725,11 @@ def build_areas_hub():
         cols += f'<div><div class="section-head" style="margin-bottom:14px"><h2 style="font-size:1.4rem">{esc(county)} County</h2></div><div class="grid" style="gap:10px">{chips}</div></div>'
     graph = [breadcrumb_node([("Home","/"),("Service Areas","/service-areas/")])]
     body = f'''<section class="page-hero"><div class="container"><div class="page-hero-grid">
-      <div><span class="eyebrow">Service Areas</span><h1>Door Installation &amp; Repair Across Metro Detroit</h1>
+      <div><span class="eyebrow">Service Areas</span><h1>Metro Detroit Service Areas for Door Installation &amp; Repair</h1>
       <p>No storefront, no markup for a fancy showroom — just a local crew that comes to you. We serve metro Detroit and every suburb within 35 miles across Wayne, Oakland, and Macomb counties.</p>
       <div class="hero-cta"><a class="btn btn-primary btn-lg" href="/contact/">Get a Free Estimate</a>
       <a class="btn btn-ghost btn-lg" href="tel:{BIZ["tel"]}">{ICONS["phone"]} {esc(BIZ["phone"])}</a></div></div>
-      <div class="page-hero-media"><img src="/assets/img/area-neighborhood.webp" width="1600" height="900" alt="Metro Detroit suburban neighborhood served by BH Door Solutions"></div>
+      <div class="page-hero-media"><img src="/assets/img/area-neighborhood.webp" srcset="{srcset("area-neighborhood",1600)}" sizes="{SIZES_HERO}" width="1600" height="900" fetchpriority="high" alt="Metro Detroit suburban neighborhood served by BH Door Solutions"></div>
     </div></div></section>
     {breadcrumb([("Home","/"),("Service Areas","/service-areas/")])}
     {trust_strip()}
@@ -703,19 +751,41 @@ def build_city(slug):
     for s in top:
         si=SVC_INFO[s]; sc=SVC_COPY[s]
         top_cards += f'''<a class="card svc-card" href="{svc_url(s)}">
-          <div class="sc-media"><img src="/assets/img/{si["img"]}.webp" width="1200" height="800" loading="lazy" alt="{esc(si["nav"])} in {esc(c["city"])}, MI"></div>
+          <div class="sc-media"><img src="/assets/img/{si["img"]}.webp" srcset="{srcset(si["img"],1200)}" sizes="{SIZES_CARD}" width="1200" height="800" loading="lazy" alt="{esc(si["nav"])} in {esc(c["city"])}, MI"></div>
           <div class="sc-body"><h3>{esc(si["nav"])}</h3><p>{esc(sc["hero_tagline"])}</p><span class="sc-link">Learn more {ICONS["arrow"]}</span></div></a>'''
     neigh = "".join(f'<a class="city-chip" href="{city_url(n)}">{esc(city_name(n))} {ICONS["arrow"]}<span>{CITY_META[n][0]} Co.</span></a>' for n in neighbors)
     graph = [breadcrumb_node([("Home","/"),("Service Areas","/service-areas/"),(c["city"],city_url(slug))]),
-             service_node(f"Door Installation and Repair in {c['city']}, MI", "door-repair", c["meta_description"], areas=[slug]),
+             service_node(f"Door Installation and Repair in {c['city']}, MI", "door-repair", c["meta_description"], areas=[slug],
+                          url_path=city_url(slug), service_type="Door Installation and Repair"),
              faq_node(faqs)]
-    img = "area-neighborhood.webp" if CITY_ORDER.index(slug)%2==0 else "area-neighborhood2.webp"
+    img_name = "area-neighborhood" if CITY_ORDER.index(slug)%2==0 else "area-neighborhood2"
+    img = img_name + ".webp"
+    # "door replacement {City} MI" coverage (BUILD-BRIEF §4) — phrasing rotates so city pages stay distinct
+    _svc1 = SVC_INFO[top[0]]["nav"]; _svc2 = SVC_INFO[top[1]]["nav"]
+    _ri = CITY_ORDER.index(slug) % 4
+    if _ri == 0:
+        repl_p = (f"Not every door can — or should — be saved. When rot, warping, or years of {county} County freeze-thaw have done "
+                  f"their damage, we'll tell you straight and quote a full door replacement in {c['city']} at an honest, flat rate. "
+                  f"You'll get clear repair-versus-replace advice, plus options across {_svc1.lower()} and {_svc2.lower()} that fit your home and budget.")
+    elif _ri == 1:
+        repl_p = (f"If your door is past fixing, our {c['city']} door replacement service handles everything in one visit — we remove the "
+                  f"old unit, set the new door plumb and square, seal it against Michigan weather, and haul away the debris. "
+                  f"From {_svc1.lower()} to {_svc2.lower()}, replacement quotes in {c['city']} are always free and no-obligation.")
+    elif _ri == 2:
+        repl_p = (f"Thinking about door replacement in {c['city']}? We'll walk you through material choices, energy efficiency, and real "
+                  f"pricing before you commit — and if a repair will honestly do the job, we'll say so. Most {c['city']} replacements, "
+                  f"including {_svc1.lower()} and {_svc2.lower()}, are finished the same day we start.")
+    else:
+        repl_p = (f"When {c['city']} homeowners ask whether it's time to replace a door, we look at the frame, the seal, and the hardware "
+                  f"— not just the slab. If replacement wins, you get an exact flat-rate quote covering the door, labor, and cleanup. "
+                  f"We replace everything from {_svc1.lower()} to {_svc2.lower()} across {county} County.")
+    replacement_sec = f'<h2>Door replacement in {esc(c["city"])}, MI</h2><p>{esc(repl_p)}</p>'
     body = f'''<section class="page-hero"><div class="container"><div class="page-hero-grid">
       <div><span class="eyebrow">{esc(county)} County · Metro Detroit</span><h1>{esc(c["h1"])}</h1>
       <p>{esc(c["hero_tagline"])}</p>
       <div class="hero-cta"><a class="btn btn-primary btn-lg" href="/contact/">Free Estimate in {esc(c["city"])}</a>
       <a class="btn btn-ghost btn-lg" href="tel:{BIZ["tel"]}">{ICONS["phone"]} {esc(BIZ["phone"])}</a></div></div>
-      <div class="page-hero-media"><img src="/assets/img/{img}" width="1600" height="900" fetchpriority="high" alt="Door installation and repair in {esc(c["city"])}, Michigan"></div>
+      <div class="page-hero-media"><img src="/assets/img/{img}" srcset="{srcset(img_name,1600)}" sizes="{SIZES_HERO}" width="1600" height="900" fetchpriority="high" alt="Door installation and repair in {esc(c["city"])}, Michigan"></div>
     </div></div></section>
     {breadcrumb([("Home","/"),("Service Areas","/service-areas/"),(c["city"],city_url(slug))])}
     {trust_strip()}
@@ -724,6 +794,7 @@ def build_city(slug):
         <p class="lead">{esc(c["intro_lead"])}</p>
         <h2>Door installation &amp; repair {esc(c["city"])} homeowners rely on</h2>
         {ctx}
+        {replacement_sec}
         <h2>The doors {esc(c["city"])} homes need most</h2>
         <p>{esc(c["service_emphasis"])}</p>
       </div>
@@ -740,7 +811,7 @@ def build_city(slug):
     <section class="section bg-cloud"><div class="container">
       <div class="section-head center"><span class="eyebrow">Popular in {esc(c["city"])}</span><h2>Our most-requested {esc(c["city"])} door services</h2></div>
       <div class="grid grid-4">{top_cards}</div></div></section>
-    {faq_section(faqs, f"Door service in {esc(c['city'])} — FAQs")}
+    {faq_section(faqs, f"Door service in {c['city']} — FAQs")}
     <section class="section"><div class="container">
       <div class="section-head"><span class="eyebrow">Nearby</span><h2>We also serve neighboring communities</h2></div>
       <div class="city-grid">{neigh}</div></div></section>
@@ -762,7 +833,7 @@ def build_about():
       <div><span class="eyebrow">About Us</span><h1>{esc(a["h1"])}</h1><p>{esc(a["lead"])}</p>
       <div class="hero-cta"><a class="btn btn-primary btn-lg" href="/contact/">Work With Us</a>
       <a class="btn btn-ghost btn-lg" href="tel:{BIZ["tel"]}">{ICONS["phone"]} {esc(BIZ["phone"])}</a></div></div>
-      <div class="page-hero-media"><img src="/assets/img/about-team.webp" width="1200" height="900" alt="BH Door Solutions — metro Detroit door installation and repair team"></div>
+      <div class="page-hero-media"><img src="/assets/img/about-team.webp" srcset="{srcset("about-team",1200)}" sizes="{SIZES_HERO}" width="1200" height="900" fetchpriority="high" alt="BH Door Solutions — metro Detroit door installation and repair team"></div>
     </div></div></section>
     {breadcrumb([("Home","/"),("About","/about/")])}
     {trust_strip()}
@@ -777,31 +848,58 @@ def build_about():
 def build_financing():
     f = CORE["financing"]
     pts = "".join(f"<li>{esc(x)}</li>" for x in f["points"])
-    graph = [breadcrumb_node([("Home","/"),("Financing","/financing/")])]
+    fin_faqs = [
+        ("Can I finance a door installation in metro Detroit?",
+         "Yes. BH Door Solutions offers financing options through third-party lenders on approved credit, so you can replace an entry, patio, or storm door now and spread the cost over comfortable monthly payments. Ask your estimator for current plans when you book your free estimate."),
+        ("Does applying for door financing affect the price of the job?",
+         "No. Your flat-rate quote is the same whether you pay upfront or finance. We quote the door, materials, and labor first — then you choose the payment option that works for you. There's never a penalty for paying the job off early with our typical lender programs."),
+        ("What door projects can be financed?",
+         "Most projects qualify — entry and front door replacement, patio and sliding doors, storm doors, interior door packages, and commercial door work. Larger projects like a full entry system with sidelights are where monthly payments help most, but smaller jobs can qualify too."),
+        ("How do I get started with financing?",
+         "Book your free estimate first. Once you have your flat-rate quote, we'll walk you through the current financing options and the lender's short application — most decisions come back quickly, and approved projects can usually be scheduled right away."),
+    ]
+    graph = [breadcrumb_node([("Home","/"),("Financing","/financing/")]), faq_node(fin_faqs)]
+    steps = """<ol>
+        <li><strong>Get your free estimate.</strong> We measure, walk you through options at every price point, and give you a clear flat-rate quote — no obligation.</li>
+        <li><strong>Choose how to pay.</strong> Pay upfront, or ask about monthly payment plans through our third-party lending partners on approved credit.</li>
+        <li><strong>Quick application.</strong> The lender's application takes minutes, and most credit decisions come back fast.</li>
+        <li><strong>We get to work.</strong> Once approved, we schedule your installation or repair — often the same week.</li>
+      </ol>"""
     body = f'''<section class="page-hero"><div class="container"><div class="page-hero-grid">
       <div><span class="eyebrow">Financing</span><h1>{esc(f["h1"])}</h1><p>{esc(f["lead"])}</p>
       <div class="hero-cta"><a class="btn btn-primary btn-lg" href="/contact/">Ask About Financing</a>
       <a class="btn btn-ghost btn-lg" href="tel:{BIZ["tel"]}">{ICONS["phone"]} {esc(BIZ["phone"])}</a></div></div>
-      <div class="page-hero-media"><img src="/assets/img/svc-cost.webp" width="1200" height="800" alt="Door installation financing options in metro Detroit"></div>
+      <div class="page-hero-media"><img src="/assets/img/svc-cost.webp" srcset="{srcset("svc-cost",1200)}" sizes="{SIZES_HERO}" width="1200" height="800" fetchpriority="high" alt="Door installation financing options in metro Detroit"></div>
     </div></div></section>
     {breadcrumb([("Home","/"),("Financing","/financing/")])}
+    {trust_strip()}
     <section class="section"><div class="container"><div class="prose wide" style="margin-inline:auto">
       {paras(f["body"])}
       <h2>Flexible ways to pay</h2><ul>{pts}</ul>
+      <h2>How financing a door project works</h2>
+      {steps}
+      <h2>Why metro Detroit homeowners finance their doors</h2>
+      <p>A quality entry or patio door is one of the highest-return upgrades a Michigan home can get — better security, lower heating bills through the freeze-thaw months, and instant curb appeal. But doors fail on their own schedule, not your budget's. Financing lets you fix a drafty, damaged, or broken door <em>now</em>, before a Michigan winter makes it worse, and pay over time instead of putting the project off another season.</p>
+      <p>It also means you don't have to settle. Homeowners who planned on a basic slab often find that for a modest monthly difference they can get the insulated fiberglass door, the glass sidelights, or the smart lock they actually wanted. Pair your quote with our <a href="/services/door-installation-cost/">door installation cost guide</a> to see typical metro Detroit price ranges before we arrive.</p>
       <div class="note">Ask your BH Door Solutions estimator about current financing options and promotions when you book your free estimate. Terms are provided by third-party lenders on approved credit.</div>
     </div></div></section>
-    {cta_band()}'''
+    {faq_section(fin_faqs, "Door financing — FAQs")}
+    {cta_band("Ready to upgrade without the wait?", "Get your free estimate and ask about monthly payment options — fast, same-day service across metro Detroit whenever our schedule allows.")}'''
     render("/financing/", f["meta_title"], f["meta_description"], body, graph)
 
 def build_reviews():
     graph = [breadcrumb_node([("Home","/"),("Reviews","/reviews/")])]
-    g = BIZ["google"] or "#"
+    if BIZ["google"]:
+        hero_btns = (f'<a class="btn btn-primary btn-lg" href="{BIZ["google"]}" target="_blank" rel="noopener">{ICONS["google"]} Read Google Reviews</a>'
+                     f'<a class="btn btn-ghost btn-lg" href="/contact/">Get a Free Estimate</a>')
+    else:
+        hero_btns = (f'<a class="btn btn-primary btn-lg" href="/contact/">Get a Free Estimate</a>'
+                     f'<a class="btn btn-ghost btn-lg" href="tel:{BIZ["tel"]}">{ICONS["phone"]} {esc(BIZ["phone"])}</a>')
     body = f'''<section class="page-hero"><div class="container"><div class="page-hero-grid">
       <div><span class="eyebrow">Reviews</span><h1>What Metro Detroit Says About Us</h1>
       <p>{esc(CORE["reviews_lead"])}</p>
-      <div class="hero-cta"><a class="btn btn-primary btn-lg" href="{g}"{' rel="nofollow"' if not BIZ["google"] else ''} target="_blank" rel="noopener">{ICONS["google"]} Read Google Reviews</a>
-      <a class="btn btn-ghost btn-lg" href="/contact/">Get a Free Estimate</a></div></div>
-      <div class="page-hero-media"><img src="/assets/img/svc-entry.webp" width="1200" height="800" alt="Happy metro Detroit homeowners and their new doors"></div>
+      <div class="hero-cta">{hero_btns}</div></div>
+      <div class="page-hero-media"><img src="/assets/img/svc-entry.webp" srcset="{srcset("svc-entry",1200)}" sizes="{SIZES_HERO}" width="1200" height="800" fetchpriority="high" alt="Happy metro Detroit homeowners and their new doors"></div>
     </div></div></section>
     {breadcrumb([("Home","/"),("Reviews","/reviews/")])}
     {trust_strip()}
@@ -816,7 +914,7 @@ def build_reviews():
       </ul>
       <div class="note">Already worked with us? We'd be grateful for your feedback — it helps your neighbors find a door company they can trust. Call {esc(BIZ["phone"])} and we'll send you a review link.</div>
     </div></div></section>
-    {reviews_invite()}
+    {reviews_invite(on_reviews_page=True)}
     {cta_band()}'''
     render("/reviews/", "Reviews — BH Door Solutions Metro Detroit",
            "See what to expect from BH Door Solutions — metro Detroit's local door installation & repair team. Licensed, insured, guaranteed, same-day service.",
@@ -874,7 +972,7 @@ def build_gallery():
              ("svc-commercial","Commercial storefront doors"),("process-install","Professional installation"),
              ("cta-door","Craftsman front entry")]
     cards = "".join(
-        f'<figure class="card"><div class="sc-media" style="aspect-ratio:3/2"><img src="/assets/img/{s}.webp" width="1200" height="800" loading="lazy" alt="{esc(t)} — BH Door Solutions metro Detroit"></div>'
+        f'<figure class="card"><div class="sc-media" style="aspect-ratio:3/2"><img src="/assets/img/{s}.webp" srcset="{srcset(s, 1600 if s=="cta-door" else 1200)}" sizes="{SIZES_CARD}" width="1200" height="800" loading="lazy" alt="{esc(t)} — BH Door Solutions metro Detroit"></div>'
         f'<figcaption class="sc-body"><h3 style="font-size:1.05rem">{esc(t)}</h3></figcaption></figure>'
         for s,t in shots)
     body = f'''<section class="page-hero"><div class="container">
@@ -891,20 +989,28 @@ def build_gallery():
            body, graph)
 
 def build_faq_hub():
+    # NOTE: no FAQPage schema here — each Q&A is already marked up once on its source page
+    # (home or its service page). Google's guideline is to mark up each FAQ a single time.
     all_faqs = [(f["q"],f["a"]) for f in CORE["home"]["faqs"]]
     seen = set(q for q,_ in all_faqs)
     for s in SVC_ORDER:
         for f in SVC_COPY[s]["faqs"]:
             if f["q"] not in seen:
                 all_faqs.append((f["q"],f["a"])); seen.add(f["q"])
-    graph = [breadcrumb_node([("Home","/"),("FAQ","/faq/")]), faq_node(all_faqs)]
+    graph = [breadcrumb_node([("Home","/"),("FAQ","/faq/")])]
     items = "".join(f'<details><summary>{esc(q)}</summary><div class="faq-a"><p>{esc(a)}</p></div></details>' for q,a in all_faqs)
+    svc_faq_links = " · ".join(f'<a href="{svc_url(s)}">{esc(SVC_INFO[s]["nav"])}</a>' for s in SVC_ORDER)
     body = f'''<section class="page-hero"><div class="container">
       <div style="max-width:760px"><span class="eyebrow">Answers</span><h1>Door Installation &amp; Repair FAQs</h1>
-      <p>Everything metro Detroit homeowners and businesses ask us about doors — costs, timelines, warranties, emergencies, and more.</p></div>
+      <p>Everything metro Detroit homeowners and businesses ask us about doors — costs, timelines, warranties, and more.</p></div>
     </div></section>
     {breadcrumb([("Home","/"),("FAQ","/faq/")])}
-    <section class="section"><div class="container"><div class="faq">{items}</div></div></section>
+    <section class="section"><div class="container">
+      <div class="prose wide" style="margin-inline:auto;margin-bottom:1.6em">
+        <p class="lead">This is the master list of every question we get asked across metro Detroit — pulled together in one place so you can compare answers across services. Deciding between repair and replacement? Start with the cost questions, then check the service-specific ones below.</p>
+        <p>Prefer answers in context? Each service page covers its own FAQs alongside photos, what's included, and pricing guidance: {svc_faq_links}. Still stuck? <a href="/contact/">Send us the question</a> — a real person answers, usually the same day.</p>
+      </div>
+      <div class="faq">{items}</div></div></section>
     {cta_band()}'''
     render("/faq/", "Door Installation & Repair FAQs | BH Door Solutions Metro Detroit",
            "Answers to common questions about door installation & repair in metro Detroit — cost, timelines, warranties, same-day service, and more.",
@@ -921,7 +1027,7 @@ def build_thanks():
     </div></section>'''
     render("/thank-you/", "Thank You | BH Door Solutions Metro Detroit",
            "Thanks for contacting BH Door Solutions. We'll be in touch shortly.", body, graph,
-           extra_head='<meta name="robots" content="noindex,follow">')
+           noindex=True)
 
 def build_404():
     body = f'''<section class="section" style="min-height:56vh;display:grid;place-items:center;text-align:center"><div class="container" style="max-width:640px">
