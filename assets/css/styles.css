@@ -228,6 +228,9 @@ strong{font-weight:700;color:var(--navy)}
 .why-card{background:linear-gradient(160deg,rgba(255,255,255,.06),rgba(255,255,255,.02));
   border:1px solid rgba(255,255,255,.1);border-radius:var(--r-lg);padding:26px 24px;height:100%}
 .why-card .f-ic{background:rgba(232,161,27,.14);color:var(--gold-400)}
+.why-card .why-img{width:100%;aspect-ratio:4/3;border-radius:14px;overflow:hidden;margin-bottom:18px;
+  background:#101c30;border:1px solid rgba(232,161,27,.12)}
+.why-card .why-img img{width:100%;height:100%;object-fit:cover;display:block}
 .why-card h3{color:#fff;font-size:1.16rem;margin-bottom:.3em}
 .why-card p{color:#b9c8d8;font-size:.95rem;margin:0}
 

@@ -433,7 +433,10 @@ def brands_block():
 def value_props_block(intro=None):
     cards = ""
     for i,t,d in VALUE_PROPS:
-        cards += f'<div class="why-card"><div class="f-ic">{ICONS[i]}</div><h3>{esc(t)}</h3><p>{esc(d)}</p></div>'
+        img = (f'<div class="why-img"><img src="/assets/img/why-{i}.webp" '
+               f'srcset="/assets/img/why-{i}-400.webp 400w, /assets/img/why-{i}.webp 800w" '
+               f'sizes="(max-width: 700px) 100vw, 33vw" width="800" height="600" loading="lazy" alt=""></div>')
+        cards += f'<div class="why-card">{img}<h3>{esc(t)}</h3><p>{esc(d)}</p></div>'
     sub = f'<p>{esc(intro)}</p>' if intro else ''
     return f'''<section class="section bg-navy"><div class="container">
       <div class="section-head center"><span class="eyebrow">Why BH Door Solutions</span>

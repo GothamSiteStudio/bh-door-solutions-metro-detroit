@@ -75,13 +75,13 @@ def crop_resize(im, w, h):
     left = (nw-tw)//2; top = (nh-th)//2
     return im.crop((left, top, left+tw, top+th))
 
-def gen(name, prompt, tries=3):
+def gen(name, prompt, tries=3, style=None):
     raw_path = os.path.join(RAW_DIR, name+".png")
     if os.path.exists(raw_path):
         return raw_path
     if not KEY:
         raise SystemExit("Set GEMINI_API_KEY (or GEMINI_KEY_FILE) to run image generation.")
-    body = {"contents":[{"parts":[{"text": prompt + STYLE}]}]}
+    body = {"contents":[{"parts":[{"text": prompt + (STYLE if style is None else style)}]}]}
     for t in range(tries):
         try:
             req = urllib.request.Request(URL, data=json.dumps(body).encode(),
@@ -126,6 +126,40 @@ def make_og(hero_raw):
     d.text((110,500), "(313) 236-4558", font=font(40), fill=(255,255,255))
     im.save(out, quality=88)
     print("  og-image.jpg written")
+
+# --------------------------------------------------------------------------- #
+#  WHY-CARD ICON ILLUSTRATIONS (replace the generic inline SVG line icons)
+# --------------------------------------------------------------------------- #
+ICON_STYLE = (" Premium minimalist 3D rendered icon illustration for an upscale door-company website. "
+              "Deep matte navy blue and warm amber gold color palette, soft studio lighting, gentle "
+              "soft shadows, subtle reflections, single centered subject, solid very dark navy blue "
+              "background, clean, high detail. No text, no words, no letters, no numbers, no watermark.")
+
+WHY_ICONS = {
+ "why-clock": "A sleek modern 3D wall clock with warm amber gold hands and markers on a navy face, a few small golden motion streaks around it conveying speed and same-day service.",
+ "why-mappin": "A glossy 3D amber gold map location pin standing upright on a small floating stylized navy 3D street-grid map tile with tiny suburban rooftops.",
+ "why-door": "An elegant miniature 3D residential front entry door with an amber gold handle and frame, slightly ajar with warm golden light glowing from inside the doorway.",
+ "why-hand": "Two stylized 3D hands in a firm friendly handshake, one with a navy sleeve and one with a warm gray sleeve, subtle amber gold glow, conveying honesty and a fair deal.",
+ "why-truck": "A stylized 3D service van with a navy blue body and amber gold accents, rear doors open revealing neatly organized shelves of tools, conveying a fully-stocked one-visit fix.",
+ "why-spark": "A charming miniature 3D suburban house facade with a brand-new amber-lit front door and small golden sparkles floating around the entryway, conveying a curb-appeal upgrade.",
+}
+
+def make_why_icons():
+    """Generate the 6 why-card illustrations (800x600 + 400x300 variant each)."""
+    for name, prompt in WHY_ICONS.items():
+        webp = os.path.join(IMG_DIR, name + ".webp")
+        small = os.path.join(IMG_DIR, name + "-400.webp")
+        if os.path.exists(webp) and os.path.exists(small):
+            print(f"skip {name} (exists)"); continue
+        print(f"generating {name} ...")
+        raw = gen(name, prompt, style=ICON_STYLE)
+        if not raw:
+            print(f"  FAILED {name}"); continue
+        im = Image.open(raw)
+        crop_resize(im.copy(), 800, 600).save(webp, "WEBP", quality=82, method=6)
+        crop_resize(im.copy(), 400, 300).save(small, "WEBP", quality=80, method=6)
+        print(f"  -> {name}.webp (800x600) + -400 variant")
+    print("why-icons DONE")
 
 def make_variants():
     """Responsive srcset variants (-480/-800/-1200.webp) for every template image.
@@ -186,6 +220,9 @@ def main():
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "variants":
         make_variants()
+    elif len(sys.argv) > 1 and sys.argv[1] == "why-icons":
+        make_why_icons()
     else:
         main()
         make_variants()
+        make_why_icons()
