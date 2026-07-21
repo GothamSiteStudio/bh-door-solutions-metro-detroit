@@ -67,6 +67,7 @@ ICONS = {
  "building": _svg('<rect x="5" y="3.5" width="14" height="17" rx="1"/><path d="M9 8h2M13 8h2M9 12h2M13 12h2M9 16h2M13 16h2"/>'),
  "lock": _svg('<rect x="5" y="10.5" width="14" height="9.5" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/>'),
  "wind": _svg('<path d="M3 8h11a3 3 0 1 0-3-3M3 12h15a3 3 0 1 1-3 3M3 16h9a2.5 2.5 0 1 1-2.5 2.5"/>'),
+ "garage": _svg('<path d="M3.5 10 12 4.5l8.5 5.5"/><path d="M5.5 20V10.8M18.5 20V10.8"/><path d="M8 13.2h8M8 16.2h8M8 19.2h8"/>'),
  "panels": _svg('<rect x="4" y="3.5" width="7" height="17" rx="1"/><rect x="13" y="3.5" width="7" height="17" rx="1"/>'),
  "slide": _svg('<rect x="3.5" y="4" width="17" height="16" rx="1"/><path d="M12 4v16"/><path d="M15 10v4"/>'),
  "frame": _svg('<rect x="4.5" y="3.5" width="15" height="17" rx="1"/><rect x="8" y="7" width="8" height="13"/>'),
@@ -100,6 +101,7 @@ SVC_META = [
  ("door-frame-repair", "Door Frame & Jamb Repair", "frame", "svc-frame", "Repair"),
  ("lock-hardware-installation", "Locks & Hardware", "lock", "svc-lock", "Repair"),
  ("commercial-door-repair", "Commercial Doors", "building", "svc-commercial", "Commercial"),
+ ("garage-door-opener-repair", "Garage Door Opener Repair", "garage", "garage-door-opener-repair-hero", "Repair"),
  ("door-installation-cost", "Cost Guide", "dollar", "svc-cost", "Planning"),
 ]
 SVC_ORDER = [s[0] for s in SVC_META]
@@ -115,6 +117,7 @@ RELATED = {
  "door-frame-repair": ["door-repair","lock-hardware-installation","entry-door-installation","storm-door-installation"],
  "lock-hardware-installation": ["door-repair","door-frame-repair","entry-door-installation","interior-door-installation"],
  "commercial-door-repair": ["door-frame-repair","lock-hardware-installation","door-repair","door-installation-cost"],
+ "garage-door-opener-repair": ["door-repair","door-frame-repair","commercial-door-repair","door-installation-cost"],
  "door-installation-cost": ["entry-door-installation","patio-door-installation","storm-door-installation","door-repair"],
 }
 
@@ -137,6 +140,42 @@ CITY_META = {
  "ferndale": ("Oakland", ["royal-oak","southfield","birmingham"], ["entry-door-installation","patio-door-installation","door-repair","interior-door-installation"]),
  "grosse-pointe-woods": ("Wayne", ["st-clair-shores","warren","clinton-township"], ["entry-door-installation","patio-door-installation","lock-hardware-installation","interior-door-installation"]),
  "northville": ("Wayne", ["novi","canton","livonia"], ["entry-door-installation","patio-door-installation","interior-door-installation","door-installation-cost"]),
+ "chesterfield-township": ("Macomb", ["macomb-township", "mount-clemens", "clinton-township"], ["entry-door-installation", "patio-door-installation", "commercial-door-repair", "door-repair"]),
+ "eastpointe": ("Macomb", ["roseville", "st-clair-shores", "warren"], ["door-repair", "entry-door-installation", "garage-door-opener-repair", "door-frame-repair"]),
+ "fraser": ("Macomb", ["roseville", "clinton-township", "sterling-heights"], ["sliding-door-repair", "entry-door-installation", "commercial-door-repair", "door-repair"]),
+ "macomb-township": ("Macomb", ["shelby-township", "chesterfield-township", "utica"], ["entry-door-installation", "patio-door-installation", "interior-door-installation", "sliding-door-repair"]),
+ "mount-clemens": ("Macomb", ["clinton-township", "fraser", "roseville"], ["door-frame-repair", "door-repair", "entry-door-installation", "lock-hardware-installation"]),
+ "roseville": ("Macomb", ["st-clair-shores", "eastpointe", "warren"], ["door-repair", "entry-door-installation", "storm-door-installation", "door-frame-repair"]),
+ "utica": ("Macomb", ["sterling-heights", "shelby-township", "rochester-hills"], ["entry-door-installation", "door-repair", "door-frame-repair", "storm-door-installation"]),
+ "auburn-hills": ("Oakland", ["rochester-hills", "troy", "pontiac"], ["commercial-door-repair", "garage-door-opener-repair", "entry-door-installation", "door-repair"]),
+ "berkley": ("Oakland", ["royal-oak", "huntington-woods", "oak-park"], ["entry-door-installation", "storm-door-installation", "interior-door-installation", "door-repair"]),
+ "bloomfield-hills": ("Oakland", ["birmingham", "west-bloomfield", "troy"], ["entry-door-installation", "patio-door-installation", "interior-door-installation", "door-installation-cost"]),
+ "clarkston": ("Oakland", ["waterford", "lake-orion", "auburn-hills"], ["entry-door-installation", "interior-door-installation", "door-frame-repair", "door-repair"]),
+ "clawson": ("Oakland", ["troy", "royal-oak", "madison-heights"], ["entry-door-installation", "storm-door-installation", "door-repair", "garage-door-opener-repair"]),
+ "commerce-township": ("Oakland", ["west-bloomfield", "waterford", "wixom"], ["patio-door-installation", "entry-door-installation", "sliding-door-repair", "door-repair"]),
+ "hazel-park": ("Oakland", ["ferndale", "madison-heights", "warren"], ["door-repair", "door-frame-repair", "lock-hardware-installation", "storm-door-installation"]),
+ "huntington-woods": ("Oakland", ["berkley", "royal-oak", "oak-park"], ["entry-door-installation", "interior-door-installation", "door-repair", "door-installation-cost"]),
+ "lake-orion": ("Oakland", ["rochester", "clarkston", "auburn-hills"], ["patio-door-installation", "storm-door-installation", "sliding-door-repair", "door-repair"]),
+ "madison-heights": ("Oakland", ["royal-oak", "troy", "warren"], ["entry-door-installation", "door-repair", "commercial-door-repair", "garage-door-opener-repair"]),
+ "oak-park": ("Oakland", ["ferndale", "southfield", "royal-oak"], ["entry-door-installation", "interior-door-installation", "door-repair", "storm-door-installation"]),
+ "pontiac": ("Oakland", ["auburn-hills", "waterford", "bloomfield-hills"], ["door-repair", "door-frame-repair", "entry-door-installation", "lock-hardware-installation"]),
+ "rochester": ("Oakland", ["rochester-hills", "shelby-township", "utica"], ["entry-door-installation", "storm-door-installation", "interior-door-installation", "door-repair"]),
+ "south-lyon": ("Oakland", ["novi", "northville", "wixom"], ["entry-door-installation", "storm-door-installation", "interior-door-installation", "door-repair"]),
+ "waterford": ("Oakland", ["pontiac", "west-bloomfield", "auburn-hills"], ["entry-door-installation", "storm-door-installation", "door-repair", "sliding-door-repair"]),
+ "west-bloomfield": ("Oakland", ["bloomfield-hills", "farmington-hills", "waterford"], ["entry-door-installation", "patio-door-installation", "sliding-door-repair", "door-repair"]),
+ "wixom": ("Oakland", ["novi", "commerce-township", "south-lyon"], ["entry-door-installation", "patio-door-installation", "sliding-door-repair", "commercial-door-repair"]),
+ "allen-park": ("Wayne", ["lincoln-park", "taylor", "dearborn"], ["entry-door-installation", "storm-door-installation", "interior-door-installation", "door-repair"]),
+ "dearborn-heights": ("Wayne", ["dearborn", "westland", "livonia"], ["storm-door-installation", "entry-door-installation", "door-repair", "door-frame-repair"]),
+ "garden-city": ("Wayne", ["westland", "livonia", "dearborn-heights"], ["entry-door-installation", "storm-door-installation", "door-repair", "door-installation-cost"]),
+ "grosse-pointe": ("Wayne", ["grosse-pointe-woods", "harper-woods", "st-clair-shores"], ["entry-door-installation", "interior-door-installation", "door-frame-repair", "lock-hardware-installation"]),
+ "harper-woods": ("Wayne", ["grosse-pointe-woods", "st-clair-shores", "eastpointe"], ["entry-door-installation", "interior-door-installation", "lock-hardware-installation", "door-repair"]),
+ "lincoln-park": ("Wayne", ["allen-park", "taylor", "dearborn"], ["door-repair", "door-frame-repair", "lock-hardware-installation", "storm-door-installation"]),
+ "plymouth": ("Wayne", ["northville", "canton", "livonia"], ["entry-door-installation", "interior-door-installation", "patio-door-installation", "door-installation-cost"]),
+ "redford": ("Wayne", ["livonia", "dearborn-heights", "farmington-hills"], ["door-repair", "door-frame-repair", "lock-hardware-installation", "entry-door-installation"]),
+ "southgate": ("Wayne", ["wyandotte", "allen-park", "lincoln-park"], ["entry-door-installation", "storm-door-installation", "sliding-door-repair", "door-repair"]),
+ "taylor": ("Wayne", ["allen-park", "lincoln-park", "dearborn-heights"], ["entry-door-installation", "sliding-door-repair", "door-repair", "commercial-door-repair"]),
+ "westland": ("Wayne", ["livonia", "canton", "dearborn-heights"], ["entry-door-installation", "storm-door-installation", "garage-door-opener-repair", "door-repair"]),
+ "wyandotte": ("Wayne", ["southgate", "lincoln-park", "allen-park"], ["entry-door-installation", "storm-door-installation", "door-frame-repair", "door-repair"]),
 }
 CITY_ORDER = [c["slug"] for c in COPY["cities"]] if COPY.get("cities") else list(CITY_META.keys())
 
@@ -183,10 +222,78 @@ def svc_url(slug): return f"/services/{slug}/"
 def city_url(slug): return f"/service-areas/{slug}/"
 def city_name(slug): return CITY_COPY[slug]["city"]
 
-def paras(lst): return "".join(f"<p>{esc_inline(p)}</p>" for p in lst)
-def esc_inline(s):
-    # allow simple emphasis by escaping then leaving text; keep it plain-safe
-    return esc(s)
+# --------------------------------------------------------------------------- #
+#  CONTEXTUAL INTERNAL LINKING
+#  Auto-links the first mention of a topic in body prose to its money page.
+#  Ordered most-specific-first so "door installation cost" wins over "door installation".
+# --------------------------------------------------------------------------- #
+LINK_PHRASES = [
+ (r"door installation costs?|door replacement costs?", "/services/door-installation-cost/"),
+ (r"garage door openers?|garage doors?", "/services/garage-door-opener-repair/"),
+ (r"storefront doors?|commercial doors?", "/services/commercial-door-repair/"),
+ (r"smart locks?|door hardware|handlesets?|rekey(?:ing)?", "/services/lock-hardware-installation/"),
+ (r"door frames?|door jambs?|weatherstripping|thresholds?", "/services/door-frame-repair/"),
+ (r"storm doors?|screen doors?", "/services/storm-door-installation/"),
+ (r"patio doors?|french doors?", "/services/patio-door-installation/"),
+ (r"sliding glass doors?|sliding doors?", "/services/sliding-door-repair/"),
+ (r"interior doors?|barn doors?|pre-?hung doors?", "/services/interior-door-installation/"),
+ (r"entry doors?|front doors?", "/services/entry-door-installation/"),
+ (r"door repairs?", "/services/door-repair/"),
+ (r"financing", "/financing/"),
+]
+
+class Linker:
+    """Per-page contextual linker: at most one link per target, capped per page,
+    never links a page to itself, and never matches inside markup it just inserted."""
+    def __init__(self, current_url, budget=5):
+        self.cur = current_url; self.budget = budget; self.used = set()
+
+    def __call__(self, t):
+        if self.budget <= 0:
+            return t
+        # regions already inside an <a> must never receive a nested link
+        blocked = [(m.start(), m.end()) for m in re.finditer(r"<a\b.*?</a>", t, re.S | re.I)]
+        linked = set(re.findall(r'<a href="(/[^"]+)"', t))
+        cands = []
+        for pattern, url in LINK_PHRASES:
+            if url == self.cur or url in self.used or url in linked:
+                continue
+            for m in re.finditer(r"\b(" + pattern + r")\b", t, re.I):
+                a, b_ = m.start(1), m.end(1)
+                if any(a < pe and b_ > ps for ps, pe in blocked):
+                    continue
+                cands.append((a, b_, url))
+                break
+        cands.sort()
+        picked, last = [], -1
+        for a, b_, u in cands:
+            if a >= last and u not in self.used:
+                picked.append((a, b_, u)); self.used.add(u); last = b_
+                if len(picked) >= self.budget:
+                    break
+        self.budget -= len(picked)
+        for a, b_, u in reversed(picked):      # splice from the end so spans stay valid
+            t = t[:a] + f'<a href="{u}">' + t[a:b_] + "</a>" + t[b_:]
+        return t
+
+# Copy recovered from the published HTML carries hand-authored internal links.
+# Escape everything, then restore ONLY simple internal <a href="/path">text</a> anchors,
+# so editorial links survive without ever letting raw markup through.
+_SAFE_A = re.compile(r'&lt;a href=&quot;(/[A-Za-z0-9/_-]*)&quot;&gt;(.*?)&lt;/a&gt;', re.S)
+
+def _restore_links(t):
+    return _SAFE_A.sub(lambda m: f'<a href="{m.group(1)}">{m.group(2)}</a>', t)
+
+def paras(lst, linker=None):
+    return "".join(f"<p>{esc_inline(p, linker)}</p>" for p in lst)
+
+def esc_inline(s, linker=None):
+    t = _restore_links(esc(s))
+    return linker(t) if linker else t
+
+def esc_li(s):
+    """List items may also carry hand-authored internal links."""
+    return _restore_links(esc(s))
 
 TOP_CITIES = ["warren","sterling-heights","troy","livonia","royal-oak","dearborn","canton","novi"]
 
@@ -276,6 +383,7 @@ SERVICE_TYPE = {
  "door-frame-repair": "Door Frame and Jamb Repair",
  "lock-hardware-installation": "Door Lock and Hardware Installation",
  "commercial-door-repair": "Commercial Door Installation and Repair",
+ "garage-door-opener-repair": "Garage Door Opener Repair",
  "door-installation-cost": "Door Installation Cost Estimation",
 }
 
@@ -330,7 +438,7 @@ def header(active=""):
             <a class="sc-link" href="/services/">All services {ICONS["arrow"]}</a></div></div></li>
         <li class="has-dd"><button aria-expanded="false" aria-haspopup="true" aria-controls="dd-areas">Service Areas <span class="caret">{ICONS["chevron"]}</span></button>
           <div class="dropdown areas" id="dd-areas"><div class="dd-grid three">{city_items}</div>
-            <div class="dd-foot"><span>18+ metro Detroit cities across 3 counties.</span>
+            <div class="dd-foot"><span>{len(CITY_ORDER)} metro Detroit cities across 3 counties.</span>
             <a class="sc-link" href="/service-areas/">All areas {ICONS["arrow"]}</a></div></div></li>
         <li><a href="/services/door-installation-cost/"{' aria-current="page"' if active=="cost" else ''}>Pricing</a></li>
         <li><a href="/about/"{' aria-current="page"' if active=="about" else ''}>About</a></li>
@@ -352,7 +460,7 @@ def mobile_cta():
 
 def footer():
     svc_links = "".join(f'<li><a href="{svc_url(s)}">{esc(SVC_INFO[s]["nav"])}</a></li>' for s in SVC_ORDER)
-    city_links = "".join(f'<li><a href="{city_url(s)}">{esc(city_name(s))}</a></li>' for s in TOP_CITIES)
+    city_links = "".join(f'<li><a href="{city_url(s)}">{esc(city_name(s))}</a></li>' for s in CITY_ORDER[:18])
     social = ""
     for key,url in [("google",BIZ["google"]),("facebook",BIZ["facebook"]),("instagram",BIZ["instagram"])]:
         if not url:
@@ -429,6 +537,57 @@ def brands_block():
     return f'''<section class="section-sm"><div class="container">
       <p class="text-center" style="color:var(--steel);font-weight:600;margin-bottom:18px">Trusted brands we install &amp; service</p>
       <div class="brands">{b}</div></div></section>'''
+
+EXTRA_HTML = {
+    'services': """<section class="section bg-cloud"><div class="container"><div class="prose wide" style="margin-inline:auto">
+      <h2>Repair or replace? Picking the right door service</h2>
+      <p>A door that binds, drags, or won&#x27;t latch is usually a repair, not a replacement, and that goes for the frame too. The <a href="/services/door-repair/">door frame repair Detroit</a> homeowners ask for after wood rot, storm damage, or a break-in is one of our most common calls, and it costs a fraction of a full entry replacement.</p>
+      <p>Patio sliders are their own specialty. Worn rollers, bent tracks, and fogged glass panels call for <a href="/services/sliding-door-repair/">sliding door repair in Detroit</a> and its suburbs, which we handle with parts already stocked on the truck.</p>
+      <p>Replacement makes sense when a slab is rotted through, a frame has failed structurally, or you want an efficiency and curb-appeal upgrade. In that case, compare <a href="/services/entry-door-installation/">entry door installation</a> options and check the <a href="/services/door-installation-cost/">cost guide</a> for typical Metro Detroit price ranges. Businesses can go straight to <a href="/services/commercial-door-repair/">commercial door repair</a>. Not sure which way to go? Request a <a href="/contact/">free estimate</a> and we&#x27;ll give you an honest answer either way.</p>
+    </div></div></section>""",
+    'contact': """<section class="section"><div class="container"><div class="prose wide" style="margin-inline:auto">
+      <h2>What happens after you reach out</h2>
+      <p>First, we talk through the problem on the phone, whether it is a front door that won&#x27;t latch, a slider off its track, or a <a href="/services/door-frame-repair/">door frame</a> split in a break-in. A few details about the door and your city are usually enough for us to schedule the visit and tell you what to expect.</p>
+      <p>Next comes the free on-site estimate. We measure, diagnose the real cause, and give you a flat-rate price in plain English before any work begins. There is no obligation and no pressure, and because our trucks come stocked, we can often finish the <a href="/services/door-repair/">door repair</a> in the same visit.</p>
+      <p>We come to you anywhere within about 35 miles of Detroit, across Wayne, Oakland, and Macomb counties. Check your city on the <a href="/service-areas/">service areas</a> page, and browse <a href="/services/">all door services</a> if you are still deciding what your door needs.</p>
+    </div></div></section>""",
+    'gallery': """<section class="section bg-cloud"><div class="container"><div class="prose wide" style="margin-inline:auto">
+      <h2>The work behind the photos</h2>
+      <p>Every image here represents a service we deliver across Metro Detroit week in and week out. Entry doors like the fiberglass unit with sidelights are the heart of our <a href="/services/entry-door-installation/">entry door installation</a> work: measured, set plumb and level, insulated, and sealed against Michigan weather. The sliding glass patio door reflects both new <a href="/services/patio-door-installation/">patio door installation</a> and the roller, track, and glass work we handle through <a href="/services/sliding-door-repair/">sliding door repair</a>.</p>
+      <p>On the repair side, the door frame and jamb photo shows the kind of rebuild we do when rot, freeze-thaw movement, or a break-in has split the wood: cutting out the damage, rebuilding with new jamb stock, and reinforcing the strike plate, as covered under <a href="/services/door-frame-repair/">door frame repair</a>. Storefront and steel doors for shops, offices, and warehouses fall under <a href="/services/commercial-door-repair/">commercial door repair</a>. Want the same result at your place? <a href="/contact/">Request a free estimate</a> and tell us which photo looks most like your project.</p>
+    </div></div></section>""",
+    'reviews': """<section class="section bg-cloud"><div class="container"><div class="prose wide" style="margin-inline:auto">
+      <h2>How we earn every review</h2>
+      <p>Trust is built on the job site, not on a webpage. Before any work starts you get a free on-site assessment and a flat-rate quote in plain English, whether the visit is a quick <a href="/services/door-repair/">door repair</a>, a <a href="/services/sliding-door-repair/">sliding door repair</a>, or a full <a href="/services/entry-door-installation/">entry door installation</a>. You approve the price before we pick up a tool.</p>
+      <p>During the work we protect your floors, keep the site tidy, and test everything before we pack up: the swing, the latch, the lock, and the seal. When we leave, your door closes flush, locks smoothly, and keeps the weather outside where it belongs. If anything is not right afterward, the workmanship guarantee means we come back and make it right.</p>
+      <p>That is the standard on every job in every suburb we serve, from <a href="/service-areas/warren/">Warren</a> to <a href="/service-areas/novi/">Novi</a>. See the kind of work we do in the <a href="/gallery/">project gallery</a>, or check whether we cover your city on the <a href="/service-areas/">service areas</a> page.</p>
+    </div></div></section>""",
+    'service-areas': """<section class="section"><div class="container"><div class="prose wide" style="margin-inline:auto">
+      <h2>One local crew, three counties</h2>
+      <p>BH Door Solutions is a service-area business: there is no showroom, so you never pay for one. Our trucks run routes through Wayne, Oakland, and Macomb counties every working day, which is how same-day <a href="/services/door-repair/">door repair</a> stays realistic across a 35-mile radius whenever the schedule allows.</p>
+      <p>The suburbs we serve do not all need the same work. Communities near the water like <a href="/service-areas/st-clair-shores/">St. Clair Shores</a> see more fogged glass and swollen frames, established inner-ring cities like <a href="/service-areas/warren/">Warren</a> and <a href="/service-areas/ferndale/">Ferndale</a> keep us busy with worn hinges and <a href="/services/sliding-door-repair/">sliding door repairs</a>, and newer subdivisions in <a href="/service-areas/novi/">Novi</a> and <a href="/service-areas/canton/">Canton</a> lean toward <a href="/services/entry-door-installation/">entry door upgrades</a> and hardware. Each city page covers the local details, from the services requested most to how scheduling works in your area.</p>
+      <p>Not listed? We still likely cover you. <a href="/contact/">Send us your city</a> and we&#x27;ll confirm coverage and set up a free estimate.</p>
+    </div></div></section>""",
+}
+# ^ sections that were added straight to the published HTML and never existed in this
+#   generator. Captured verbatim so a rebuild can no longer silently drop them.
+
+def resource_row(exclude=None, label="Helpful next steps"):
+    """Contextual links to the support pages that would otherwise only be reachable
+    from the nav/footer (about, gallery, reviews, faq, financing, cost guide)."""
+    items = [
+        ("/services/", "All door services"),
+        ("/services/door-installation-cost/", "Door cost guide"),
+        ("/service-areas/", "Areas we serve"),
+        ("/gallery/", "See our work"),
+        ("/reviews/", "Reviews &amp; our promise"),
+        ("/faq/", "Door FAQs"),
+        ("/financing/", "Financing options"),
+        ("/about/", "About BH Door Solutions"),
+    ]
+    links = " \u00b7 ".join(f'<a href="{u}">{t}</a>' for u, t in items if u != exclude)
+    return (f'<p class="text-center" style="margin-top:1.4em;font-size:.95rem;color:var(--steel)">'
+            f'<strong>{label}:</strong> {links}</p>')
 
 def value_props_block(intro=None):
     cards = ""
@@ -562,7 +721,8 @@ def build_home():
     chips_city = "".join(
         f'<a class="city-chip" href="{city_url(s)}">{esc(city_name(s))} {ICONS["arrow"]}<span>{CITY_META[s][0]} Co.</span></a>'
         for s in CITY_ORDER)
-    intro_body = paras(h["intro_body"])
+    lk = Linker("/", budget=6)
+    intro_body = paras(h["intro_body"], lk)
     faqs = [(f["q"],f["a"]) for f in h["faqs"]]
     graph = [website_node(), breadcrumb_node([("Home","/")]), faq_node(faqs),
              service_node("Door Installation and Repair","door-repair",h["meta_description"],url_path="/")]
@@ -601,9 +761,10 @@ def build_home():
     {process_block()}
     <section class="section bg-cloud"><div class="container">
       <div class="section-head center"><span class="eyebrow">Service Areas</span>
-        <h2>Proudly serving metro Detroit &amp; 18+ suburbs</h2><p>{esc(h["areas_intro"])}</p></div>
+        <h2>Proudly serving metro Detroit &amp; {len(CITY_ORDER)} suburbs</h2><p>{esc(h["areas_intro"])}</p></div>
       <div class="city-grid">{chips_city}</div>
       <p class="text-center mt-2"><a class="btn btn-navy" href="/service-areas/">See all service areas {ICONS["arrow"]}</a></p>
+      {resource_row(exclude="/", label="Explore")}
     </div></section>
     {reviews_invite()}
     {brands_block()}
@@ -637,6 +798,7 @@ def build_services_hub():
     {breadcrumb([("Home","/"),("Services","/services/")])}
     {trust_strip()}
     <section class="section"><div class="container">{sections}</div></section>
+    {EXTRA_HTML["services"]}
     {value_props_block()}
     {cta_band()}'''
     render("/services/", "Door Services Metro Detroit | BH Door Solutions",
@@ -645,14 +807,15 @@ def build_services_hub():
 
 def build_service(slug):
     c = SVC_COPY[slug]; i = SVC_INFO[slug]
+    lk = Linker(svc_url(slug), budget=6)
     secs = ""
     for s in c["sections"]:
-        b = paras(s["body"])
+        b = paras(s["body"], lk)
         bl = ""
         if s.get("bullets"):
-            bl = "<ul>" + "".join(f"<li>{esc(x)}</li>" for x in s["bullets"]) + "</ul>"
+            bl = "<ul>" + "".join(f"<li>{esc_li(x)}</li>" for x in s["bullets"]) + "</ul>"
         secs += f'<h2>{esc(s["h2"])}</h2>{b}{bl}'
-    incl = "".join(f"<li>{esc(x)}</li>" for x in c["whats_included"])
+    incl = "".join(f"<li>{esc_li(x)}</li>" for x in c["whats_included"])
     why = ""
     for w in c["why_us"]:
         why += f'<div class="feature"><div class="f-ic">{ICONS[i["icon"]]}</div><h3>{esc(w["title"])}</h3><p>{esc(w["text"])}</p></div>'
@@ -664,7 +827,11 @@ def build_service(slug):
         rel += f'''<a class="card svc-card" href="{svc_url(r)}">
           <div class="sc-media"><img src="/assets/img/{ri["img"]}.webp" srcset="{srcset(ri["img"],1200)}" sizes="{SIZES_CARD}" width="1200" height="800" loading="lazy" alt="{esc(rc["h1"])}"></div>
           <div class="sc-body"><h3>{esc(ri["nav"])}</h3><p>{esc(rc["hero_tagline"])}</p><span class="sc-link">Learn more {ICONS["arrow"]}</span></div></a>'''
-    city_links = " · ".join(f'<a href="{city_url(s)}">{esc(city_name(s))}</a>' for s in TOP_CITIES)
+    # Rotate the city list per service page (step coprime with the city count) so link
+    # equity reaches every city page instead of concentrating on the same 8 every time.
+    _off = (SVC_ORDER.index(slug) * 7) % len(CITY_ORDER)
+    _svc_cities = [CITY_ORDER[(_off + k) % len(CITY_ORDER)] for k in range(8)]
+    city_links = " · ".join(f'<a href="{city_url(s)}">{esc(city_name(s))}</a>' for s in _svc_cities)
     graph = [breadcrumb_node([("Home","/"),("Services","/services/"),(SVC_INFO[slug]["nav"],svc_url(slug))]),
              service_node(SERVICE_TYPE[slug], slug, c["meta_description"]), faq_node(faqs)]
     active = "cost" if slug=="door-installation-cost" else ""
@@ -683,7 +850,7 @@ def build_service(slug):
     {trust_strip()}
     <section class="section"><div class="container"><div class="split" style="align-items:flex-start">
       <div class="prose">
-        <p class="lead">{esc(c["intro_lead"])}</p>
+        <p class="lead">{esc_inline(c["intro_lead"], lk)}</p>
         {secs}
         <h2>What's included</h2>
         <ul>{incl}</ul>
@@ -711,9 +878,10 @@ def build_service(slug):
     {faq_section(faqs, SVC_INFO[slug]["nav"] + " — FAQs")}
     <section class="section"><div class="container">
       <div class="section-head"><span class="eyebrow">Serving metro Detroit</span><h2>Available across every suburb we serve</h2>
-      <p>Including {city_links} and <a href="/service-areas/">18+ more cities</a>.</p></div>
+      <p>Including {city_links} and <a href="/service-areas/">{len(CITY_ORDER)-8} more cities</a>.</p></div>
       <div class="section-head" style="margin-top:8px"><h2 style="font-size:1.5rem">Related services</h2></div>
-      <div class="grid grid-4">{rel}</div></div></section>
+      <div class="grid grid-4">{rel}</div>
+      {resource_row(exclude=svc_url(slug))}</div></section>
     {cta_band()}'''
     render(svc_url(slug), c["meta_title"], c["meta_description"], body, graph, active=active,
            og_image="/assets/img/og-image.jpg")
@@ -739,16 +907,18 @@ def build_areas_hub():
     <section class="section"><div class="container">
       <div class="section-head"><h2>Cities we serve</h2><p>Tap your city for local door installation and repair details. Don't see yours? We likely still cover it — just <a href="/contact/">ask</a>.</p></div>
       <div class="grid grid-3">{cols}</div></div></section>
+    {EXTRA_HTML["service-areas"]}
     {value_props_block()}
     {cta_band()}'''
     render("/service-areas/", "Service Areas — Door Installation & Repair Metro Detroit | BH Door Solutions",
-           "See the metro Detroit cities BH Door Solutions serves for door installation & repair — 18+ suburbs across Wayne, Oakland & Macomb counties. Same-day service, free estimates.",
+           f"See the metro Detroit cities BH Door Solutions serves for door installation & repair — {len(CITY_ORDER)} suburbs across Wayne, Oakland & Macomb counties. Same-day service, free estimates.",
            body, graph)
 
 def build_city(slug):
     c = CITY_COPY[slug]; county, neighbors, top = CITY_META[slug]
-    ctx = paras(c["local_context"])
-    why = "".join(f"<li>{esc(x)}</li>" for x in c["why_local"])
+    lk = Linker(city_url(slug), budget=5)
+    ctx = paras(c["local_context"], lk)
+    why = "".join(f"<li>{esc_li(x)}</li>" for x in c["why_local"])
     faqs = [(f["q"],f["a"]) for f in c["faqs"]]
     top_cards = ""
     for s in top:
@@ -761,8 +931,19 @@ def build_city(slug):
              service_node(f"Door Installation and Repair in {c['city']}, MI", "door-repair", c["meta_description"], areas=[slug],
                           url_path=city_url(slug), service_type="Door Installation and Repair"),
              faq_node(faqs)]
-    img_name = "area-neighborhood" if CITY_ORDER.index(slug)%2==0 else "area-neighborhood2"
-    img = img_name + ".webp"
+    # Prefer the bespoke per-city hero shot (unique photo + descriptive local alt text —
+    # a real local-SEO asset). Fall back to the alternating generic neighbourhood photo.
+    if c.get("hero_img"):
+        _hn = c["hero_img"]; _hw = c.get("hero_w", 1376); _hh = c.get("hero_h", 768)
+        hero_srcset = (f"/assets/img/{_hn}-480.webp 480w, /assets/img/{_hn}-800.webp 800w, "
+                       f"/assets/img/{_hn}.webp {_hw}w")
+        hero_alt = c.get("hero_alt") or f'Door installation and repair in {c["city"]}, Michigan'
+    else:
+        _hn = "area-neighborhood" if CITY_ORDER.index(slug) % 2 == 0 else "area-neighborhood2"
+        _hw, _hh = 1600, 900
+        hero_srcset = srcset(_hn, 1600)
+        hero_alt = f'Door installation and repair in {c["city"]}, Michigan'
+    img = _hn + ".webp"
     # "door replacement {City} MI" coverage (BUILD-BRIEF §4) — phrasing rotates so city pages stay distinct
     _svc1 = SVC_INFO[top[0]]["nav"]; _svc2 = SVC_INFO[top[1]]["nav"]
     _ri = CITY_ORDER.index(slug) % 4
@@ -782,24 +963,37 @@ def build_city(slug):
         repl_p = (f"When {c['city']} homeowners ask whether it's time to replace a door, we look at the frame, the seal, and the hardware "
                   f"— not just the slab. If replacement wins, you get an exact flat-rate quote covering the door, labor, and cleanup. "
                   f"We replace everything from {_svc1.lower()} to {_svc2.lower()} across {county} County.")
-    replacement_sec = f'<h2>Door replacement in {esc(c["city"])}, MI</h2><p>{esc(repl_p)}</p>'
+    # Prefer the exact wording already published for this city; only fall back to the
+    # rotating generated paragraph for cities that never had a bespoke one.
+    if c.get("replacement_paras"):
+        replacement_sec = (f'<h2>Door replacement in {esc(c["city"])}, MI</h2>'
+                           + paras(c["replacement_paras"], lk))
+    else:
+        replacement_sec = f'<h2>Door replacement in {esc(c["city"])}, MI</h2><p>{esc(repl_p)}</p>'
+    # bespoke mid-page local sections (entry/storm/interior angles written per city)
+    extra_sec = ""
+    for _s in c.get("extra_sections", []):
+        extra_sec += f'<h2>{esc(_s["h2"])}</h2>' + paras(_s["paras"], lk)
+        if _s.get("bullets"):
+            extra_sec += "<ul>" + "".join(f"<li>{esc_li(x)}</li>" for x in _s["bullets"]) + "</ul>"
     body = f'''<section class="page-hero"><div class="container"><div class="page-hero-grid">
       <div><span class="eyebrow">{esc(county)} County · Metro Detroit</span><h1>{esc(c["h1"])}</h1>
       <p>{esc(c["hero_tagline"])}</p>
       <div class="hero-cta"><a class="btn btn-primary btn-lg" href="/contact/">Free Estimate in {esc(c["city"])}</a>
       <a class="btn btn-ghost btn-lg" href="tel:{BIZ["tel"]}">{ICONS["phone"]} {esc(BIZ["phone"])}</a></div></div>
-      <div class="page-hero-media"><img src="/assets/img/{img}" srcset="{srcset(img_name,1600)}" sizes="{SIZES_HERO}" width="1600" height="900" fetchpriority="high" alt="Door installation and repair in {esc(c["city"])}, Michigan"></div>
+      <div class="page-hero-media"><img src="/assets/img/{img}" srcset="{hero_srcset}" sizes="{SIZES_HERO}" width="{_hw}" height="{_hh}" fetchpriority="high" alt="{esc(hero_alt)}"></div>
     </div></div></section>
     {breadcrumb([("Home","/"),("Service Areas","/service-areas/"),(c["city"],city_url(slug))])}
     {trust_strip()}
     <section class="section"><div class="container"><div class="split" style="align-items:flex-start">
       <div class="prose">
-        <p class="lead">{esc(c["intro_lead"])}</p>
+        <p class="lead">{esc_inline(c["intro_lead"], lk)}</p>
         <h2>Door installation &amp; repair {esc(c["city"])} homeowners rely on</h2>
         {ctx}
         {replacement_sec}
+        {extra_sec}
         <h2>The doors {esc(c["city"])} homes need most</h2>
-        <p>{esc(c["service_emphasis"])}</p>
+        <p>{esc_inline(c["service_emphasis"], lk)}</p>
       </div>
       <aside class="sidebar-card">
         <h3>Free estimate in {esc(c["city"])}</h3>
@@ -817,16 +1011,18 @@ def build_city(slug):
     {faq_section(faqs, f"Door service in {c['city']} — FAQs")}
     <section class="section"><div class="container">
       <div class="section-head"><span class="eyebrow">Nearby</span><h2>We also serve neighboring communities</h2></div>
-      <div class="city-grid">{neigh}</div></div></section>
+      <div class="city-grid">{neigh}</div>
+      {resource_row(exclude=city_url(slug))}</div></section>
     {cta_band(f"Need a door installed or repaired in {c['city']}?", "Get a free, no-obligation estimate today. Fast, same-day service across " + county + " County whenever our schedule allows.")}'''
     render(city_url(slug), c["meta_title"], c["meta_description"], body, graph)
 
 def build_about():
     a = CORE["about"]
+    lk = Linker("/about/", budget=6)
     secs = ""
     imgs = ["about-team.webp","process-install.webp","area-neighborhood.webp"]
     for idx,s in enumerate(a["body"]):
-        secs += f'<h2>{esc(s["h2"])}</h2>{paras(s["paras"])}'
+        secs += f'<h2>{esc(s["h2"])}</h2>{paras(s["paras"], lk)}'
     vals = ""
     ics = ["shield","clock","hand","badge","truck","spark"]
     for idx,v in enumerate(a["values"]):
@@ -840,7 +1036,8 @@ def build_about():
     </div></div></section>
     {breadcrumb([("Home","/"),("About","/about/")])}
     {trust_strip()}
-    <section class="section"><div class="container"><div class="prose wide" style="margin-inline:auto">{secs}</div></div></section>
+    <section class="section"><div class="container"><div class="prose wide" style="margin-inline:auto">{secs}</div>
+      {resource_row(exclude="/about/")}</div></section>
     <section class="section bg-cloud"><div class="container">
       <div class="section-head center"><span class="eyebrow">What we stand for</span><h2>Values behind every door</h2></div>
       <div class="grid grid-3">{vals}</div></div></section>
@@ -850,6 +1047,7 @@ def build_about():
 
 def build_financing():
     f = CORE["financing"]
+    lk = Linker("/financing/", budget=5)
     pts = "".join(f"<li>{esc(x)}</li>" for x in f["points"])
     fin_faqs = [
         ("Can I finance a door installation in metro Detroit?",
@@ -877,7 +1075,7 @@ def build_financing():
     {breadcrumb([("Home","/"),("Financing","/financing/")])}
     {trust_strip()}
     <section class="section"><div class="container"><div class="prose wide" style="margin-inline:auto">
-      {paras(f["body"])}
+      {paras(f["body"], lk)}
       <h2>Flexible ways to pay</h2><ul>{pts}</ul>
       <h2>How financing a door project works</h2>
       {steps}
@@ -917,6 +1115,7 @@ def build_reviews():
       </ul>
       <div class="note">Already worked with us? We'd be grateful for your feedback — it helps your neighbors find a door company they can trust. Call {esc(BIZ["phone"])} and we'll send you a review link.</div>
     </div></div></section>
+    {EXTRA_HTML["reviews"]}
     {reviews_invite(on_reviews_page=True)}
     {cta_band()}'''
     render("/reviews/", "Reviews — BH Door Solutions Metro Detroit",
@@ -962,6 +1161,7 @@ def build_contact():
       <div class="feature"><div class="f-ic">{ICONS["clock"]}</div><h3>Hours</h3><p>{esc(BIZ["hours_full"])}</p></div>
       <div class="feature"><div class="f-ic">{ICONS["mappin"]}</div><h3>Service area</h3><p>{esc(BIZ["area_line"])} across Wayne, Oakland &amp; Macomb counties.</p></div>
     </div></div></section>
+    {EXTRA_HTML["contact"]}
     {cta_band("Let's get your door sorted", "Tell us what's going on and we'll take care of it. Free estimates and fast, same-day service across metro Detroit whenever our schedule allows.")}'''
     render("/contact/", "Contact — Free Door Estimate | BH Door Solutions Metro Detroit",
            "Contact BH Door Solutions for a free door installation or repair estimate in metro Detroit. Call (313) 236-4558 — fast, same-day service available.",
@@ -986,6 +1186,7 @@ def build_gallery():
     <section class="section"><div class="container"><div class="grid grid-3">{cards}</div>
       <div class="note mt-3">Photos shown are representative of our work and product styles. Ask us for recent project examples in your neighborhood when you book a free estimate.</div>
     </div></section>
+    {EXTRA_HTML["gallery"]}
     {cta_band()}'''
     render("/gallery/", "Gallery — Door Installation & Repair | BH Door Solutions Metro Detroit",
            "See examples of door installation and repair work by BH Door Solutions across metro Detroit — entry, patio, storm, interior & commercial doors.",
